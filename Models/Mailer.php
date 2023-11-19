@@ -15,7 +15,7 @@ class Mailer extends DB {
     protected static function setup() {
         $mail = new PHPMailer(true);
         //Server settings
-        $mail->SMTPDebug = 1;                                       //Enable verbose debug output
+        $mail->SMTPDebug = 0;                                       //Enable verbose debug output
         $mail->isSMTP();                                            //Send using SMTP
         $mail->Host       = 'in-v3.mailjet.com';                    //Set the SMTP server to send through
         $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
@@ -52,11 +52,9 @@ class Mailer extends DB {
             $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
         
             $mail->send();
-            echo 'helo';
-            die;
-            return 'Message has been sent';
+            return true;
         } catch (Exception $e) {
-            return "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+            return $mail->ErrorInfo;
         }
     }
 }
