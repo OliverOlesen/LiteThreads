@@ -72,8 +72,8 @@ class UsersController extends Controller
         // the STR_PAD_LEFT is simply there to tell str_pad where to insert the character u specified
         // in our case we told it to add them on the left side of the rand value
         $randomNumber = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
-        $input['result'] = $this->users->createEmailVerf($_POST['email'], $randomNumber);
-        if (!$input['result'])
+        $result = $this->users->createEmailVerf($_POST['email'], $randomNumber);
+        if (!$result)
             return $this->jsonErrorResponse("Verification could not be created");
 
         $mailer = new Mailer();
@@ -111,17 +111,19 @@ class UsersController extends Controller
         if ($missingValues) {
             return $this->jsonErrorResponse($missingValues);
         }
-
-        // This just makes sure that there isn't a person in the database with that name or mail
-        $mailExists = $this->users->getUserByMail($_POST['email']);
-        if ($mailExists)
-            return $this->jsonErrorResponse("Email is already in use");
+            
+        $emailExists = $this->users->getUserByMail($_POST['email']);
+        if ($emailExists)
+            $existingValues['existing_values'][] = "Email";
 
         $usernameExists = $this->users->getUserByUsername($_POST['username']);
-        if ($usernameExists) {
-            return $this->jsonErrorResponse("Username is already in use");
-        }
-            
+        if ($usernameExists)
+            $existingValues['existing_values'][] = "Username";
+
+        if (isset($existingValues['existing_values']))
+            return $this->jsonErrorResponse($existingValues);
+
+
         //hashing the password before submitting it to the database
         $hashedPassword = password_hash($_POST['password'], PASSWORD_BCRYPT);
         
@@ -143,20 +145,17 @@ class UsersController extends Controller
     public function LoginUser() {
         $requiredValues = ['email', 'password'];
         $missingValues = $this->checkRequiredValues($requiredValues);
-        if ($missingValues) {
+        if ($missingValues)
             return $this->jsonErrorResponse($missingValues);
-        }
 
-        $input['result'] = $this->users->getUserCredByMail($_POST['email']);
-        if ($input['result'] == NULL) {
-            $input = ['error'=>'No user with that email.'];
-            return json_encode($input);
-        }
+        $result = $this->users->getUserCredByMail($_POST['email']);
+        if ($result == NULL)
+            return $this->jsonErrorResponse("No user with that email.");
 
         //stored hashed password from server
-        $hashedPassword = $input['result']['password'];
+        $hashedPassword = $result['password'];
         // Check if the user password "DOES NOT" match hashed password from database
-        if (!password_verify($_POST['password'], $input['result']['password'])) {
+        if (!password_verify($_POST['password'], $result['password'])) {
             return $this->jsonErrorResponse("Password did not match");
         }
 

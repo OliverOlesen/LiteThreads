@@ -9,7 +9,7 @@
     };
 
     Route::get('/', function () {
-        return "hej";        
+        return "Default route";        
     });
 
     Route::get('/get_user_with_id', 'UsersController@GetUserById');
