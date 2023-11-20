@@ -12,7 +12,15 @@ class Controller
     }
 
     protected function jsonErrorResponse($message) {
-        return json_encode(['error' => $message]);
+        $error['status'] = "failed";
+        $error['response'] = $message;
+        return json_encode($error);
+    }
+
+    protected function jsonSuccessResponse($message){
+        $success['status'] = "ok";
+        $success['response'] = $message;
+        return json_encode($success); 
     }
 
     /*

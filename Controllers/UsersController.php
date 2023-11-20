@@ -28,8 +28,29 @@ class UsersController extends Controller
         return json_encode($var);
     }
 
+    public function CheckUsernameEmailAvailable() {
+        $requiredValues = ['email', 'username'];
+        $missingValues = $this->checkRequiredValues($requiredValues);
+        if ($missingValues) {
+            return $this->jsonErrorResponse($missingValues);
+        }
+
+        $emailExists = $this->users->getUserByMail($_GET['email']);
+        if ($emailExists)
+            $existingValues['existing_values'][] = "Email";
+
+        $usernameExists = $this->users->getUserByUsername($_GET['username']);
+        if ($usernameExists)
+            $existingValues['existing_values'][] = "Username";
+
+        if (isset($existingValues['existing_values']))
+            return $this->jsonErrorResponse($existingValues);
+
+        return $this->jsonSuccessResponse("Values are available");
+    }
+
     public function CreateUserMailVerf() {
-        // Check if there correct get variables are set (email)
+        // Check if the correct get variables are set (email)
         $requiredValues = ['email'];
         $missingValues = $this->checkRequiredValues($requiredValues);
         if ($missingValues) {
@@ -44,7 +65,6 @@ class UsersController extends Controller
         $hasExistingCode = $this->users->getVerfCodeByMail($_POST['email']);
         if ($hasExistingCode)
             $request = $this->users->deleteVerfCodeByMail($_POST['email']);
-        
 
         // This generates a 6 digit long code, that could be 000000
         // but since rand wouldn't add the 0, str_pad is used to add remaining 0
@@ -53,15 +73,17 @@ class UsersController extends Controller
         // in our case we told it to add them on the left side of the rand value
         $randomNumber = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
         $input['result'] = $this->users->createEmailVerf($_POST['email'], $randomNumber);
+        if (!$input['result'])
+            return $this->jsonErrorResponse("Verification could not be created");
 
         $mailer = new Mailer();
         $mailerResult = $mailer->sendMail($_POST['email'], "Verification code", $randomNumber);
         if ($mailerResult !== true) {
+            $this->users->deleteVerfCodeByMail($_POST['email']);
             return $this->jsonErrorResponse($mailerResult);
         }
 
-        $result['status'] = "ok"; 
-        return json_encode($result);
+        return $this->jsonSuccessResponse("Verification code sent");
     }
 
     public function VerfMailCode() {
@@ -80,8 +102,7 @@ class UsersController extends Controller
 
         $request = $this->users->deleteVerfCodeByMailAndCode($_POST['email'], $_POST['verf_code']);
 
-        $result['status'] = "ok";
-        return json_encode($result);
+        return $this->jsonSuccessResponse("Verfication code matched");
     }
 
     public function CreateUser() {
@@ -111,14 +132,12 @@ class UsersController extends Controller
         
         if ($verifiedDate !== false && !array_sum($verifiedDate::getLastErrors())) {
             // Valid date
-            $response = ['status' => 'ok'];
         } else {
-            $response = ['error' => 'Date is invalid'];
-            return json_encode($response);
+            return $this->jsonErrorResponse("Birthdate is invalid");
         }
         
         $result = $this->users->createUser($_POST['username'], $hashedPassword, $_POST['email'], $_POST['birthdate']);
-        return json_encode($response);
+        return $this->jsonSuccessResponse("User was created.");
     }
 
     public function LoginUser() {
@@ -138,12 +157,11 @@ class UsersController extends Controller
         $hashedPassword = $input['result']['password'];
         // Check if the user password "DOES NOT" match hashed password from database
         if (!password_verify($_POST['password'], $input['result']['password'])) {
-            $input = ['error'=>'Password did not match user'];
-            return json_encode($input);
+            return $this->jsonErrorResponse("Password did not match");
         }
 
         //In the future this is the JWToken
-        $JWToken = ['result'=>'JWToken','status' => 'ok'];
-        return json_encode($JWToken);
+        $JWToken = "This is a JWToken";
+        return $this->jsonSuccessResponse($JWToken);
     }
 }
