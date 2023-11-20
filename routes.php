@@ -9,11 +9,16 @@
     };
 
     Route::get('/', function () {
-        return "hej";        
+        return "Default route";        
     });
 
-    Route::post('/user', 'UsersController@GetUser');
+    Route::get('/get_user_with_id', 'UsersController@GetUserById');
     Route::get('/users', 'UsersController@GetUsers');
+    Route::get('/get_user_availability', 'UsersController@CheckUsernameEmailAvailable');
+    Route::post('/create_mail_verf','UsersController@CreateUserMailVerf');
+    Route::post('/verf_mail_code','UsersController@VerfMailCode');
+    Route::post('/create_user', 'UsersController@CreateUser');
+    Route::post('/login_user', 'UsersController@LoginUser');
     Route::get('/sendmail', 'MailsController@SendMail');
 
     //For testing purposes
