@@ -9,6 +9,11 @@ class Users extends DB {
         return $userData;
     }
 
+    public function getUserIdByUsername($username) {
+        $userData = DB::selectFirst("SELECT id FROM users WHERE username = ?", [$username]);
+        return $userData;
+    }
+
     public function getUsers() {
         $userData = DB::selectAll("SELECT * FROM users");
         return $userData;
