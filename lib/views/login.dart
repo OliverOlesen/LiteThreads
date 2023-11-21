@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:litethreads/components/custom_spacer.dart';
 import 'package:litethreads/components/elevated_button.dart';
+import 'package:litethreads/components/fetch.dart';
 import 'package:litethreads/components/text_input.dart';
+import 'package:litethreads/models/user.dart';
 import 'package:litethreads/views/create_user.dart';
+import 'package:litethreads/views/navigation.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -20,11 +25,24 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     void loginPressed() {
       if (_key.currentState!.validate()) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content:
-                  Text('Processing Data')), // TODO Skift til DB post-request
-        );
+        String tempJsonBody = "";
+
+        // Login Fetch
+        fetch("/", jsonEncode(tempJsonBody)).then((value) {
+          // If successful login then make fetch for followed posts for users and groups
+          // TODO make fetch for posts
+
+          // Then login
+          User u = User.fromJson(value);
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => PageNavigation(
+                      username: u.username,
+                      email: u.email,
+                      password: u.password,
+                      birthdate: u.birthdate)));
+        });
       }
     }
 

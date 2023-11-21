@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:litethreads/components/custom_spacer.dart';
 import 'package:litethreads/components/elevated_button.dart';
+import 'package:litethreads/components/fetch.dart';
 import 'package:litethreads/components/text_input.dart';
+import 'package:litethreads/views/navigation.dart';
 
 class TwoFactorCreate extends StatefulWidget {
   final String? email;
   final String? username;
   final String? password;
-  final DateTime? birthdate;
+  final String? birthdate;
 
   const TwoFactorCreate(
       this.email, this.username, this.password, this.birthdate,
@@ -20,18 +22,36 @@ class TwoFactorCreate extends StatefulWidget {
 
 class _TwoFactorCreateState extends State<TwoFactorCreate> {
   TextEditingController validationCode = TextEditingController();
-
-  void submitCode() {
-    if (validationCode.text != "") {
-      // TODO Make post-request
-    }
-  }
+  TextEditingController twoFactorCode = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController twoFactorCode = TextEditingController();
-
-    void submitClicked() {}
+    void submitCode() {
+      if (twoFactorCode.text != "") {
+        print("HEJ");
+        // TODO Make post-request
+        var jsonBody = {
+          "username": widget.username,
+          "password": widget.password,
+          "birthdate": widget.birthdate.toString(),
+          "verif_code": twoFactorCode.text
+        };
+        fetch("/", jsonBody).then((value) {
+          if (value.status == "ok") {
+            Navigator.pop(context);
+            Navigator.pop(context);
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => PageNavigation(
+                        username: widget.username,
+                        email: widget.email,
+                        password: widget.password,
+                        birthdate: widget.birthdate)));
+          }
+        });
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(),
@@ -44,7 +64,7 @@ class _TwoFactorCreateState extends State<TwoFactorCreate> {
                 "A code has been sent to your email. \nEnter the validation code below."),
             textInputField(twoFactorCode, "Validation code"),
             customSpacer(context, 0.1),
-            eBtn(submitClicked, "Submit", Colors.blueAccent)
+            eBtn(submitCode, "Submit", Colors.blueAccent)
           ],
         ),
       ),

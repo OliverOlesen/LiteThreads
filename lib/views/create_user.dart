@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:litethreads/components/elevated_button.dart';
+import 'package:litethreads/components/error_text.dart';
+import 'package:litethreads/components/fetch.dart';
 import 'package:litethreads/components/text_input.dart';
 import 'package:litethreads/views/enter_validation.dart';
 
@@ -16,6 +18,8 @@ class _CreateUserViewState extends State<CreateUserView> {
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   DateTime pickerData = DateTime(1990, 1, 1);
+  bool showErrorsUsername = false;
+  bool showErrorsEmail = false;
   final _key = GlobalKey<FormState>();
 
   @override
@@ -43,21 +47,37 @@ class _CreateUserViewState extends State<CreateUserView> {
         if (emailController.text != "" &&
             usernameController.text != "" &&
             passwordController.text != "") {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => TwoFactorCreate(
-                      emailController.text,
-                      usernameController.text,
-                      passwordController.text,
-                      pickerData)));
-        }
+          var jsonBody = {
+            "username": usernameController.text,
+            "password": passwordController.text,
+            "email": emailController.text,
+            "birthdate":
+                "${pickerData.year}-${pickerData.month}-${pickerData.day}"
+          };
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content:
-                  Text('Processing Data')), // TODO skift til DB post-request
-        );
+          fetch("/", jsonBody).then((value) {
+            if (value.status != "ok") {
+              setState(() {
+                for (var i = 0; i < value.missingFields.length; i++) {
+                  if (value.missingFields[i].contains("email")) {
+                    showErrorsEmail = true;
+                  } else if (value.missingFields[i].contains("username")) {
+                    showErrorsUsername = true;
+                  }
+                }
+              });
+            } else {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => TwoFactorCreate(
+                          emailController.text,
+                          usernameController.text,
+                          passwordController.text,
+                          pickerData.toString())));
+            }
+          });
+        }
       }
     }
 
@@ -74,7 +94,10 @@ class _CreateUserViewState extends State<CreateUserView> {
               children: [
                 const Text("Create New User"),
                 textInputField(emailController, "Email"),
+                if (showErrorsEmail == true) errorText("Email already in use"),
                 textInputField(usernameController, "Username"),
+                if (showErrorsUsername == true)
+                  errorText("Username already taken"),
                 textInputField(passwordController, "Password"),
                 Container(
                   padding: const EdgeInsets.all(20),
