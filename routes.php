@@ -23,6 +23,10 @@
 
     // Group api's
     Route::get('/get_users_followed_groups','GroupsController@GetUsersFollowedGroups');
+    Route::get('/get_users_followed_category_groups','GroupsController@GetUsersFollowedCategoryGroups');
+    Route::get('/create_new_group','GroupsController@CreateNewGroup');
+    Route::get('/follow_group','GroupsController@FollowGroup');
+    Route::get('/unfollow_group','GroupsController@UnfollowGroup');
 
     Route::get('/sendmail', 'MailsController@SendMail');
 

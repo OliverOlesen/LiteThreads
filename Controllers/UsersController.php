@@ -25,7 +25,7 @@ class UsersController extends Controller
     public function GetUsers() {
         $input['result'] = $this->users->getUsers();
         
-        return json_encode($var);
+        return json_encode($input['result']);
     }
 
     public function CheckUsernameEmailAvailable() {

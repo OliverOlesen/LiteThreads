@@ -30,7 +30,7 @@ class Users extends DB {
     }
 
     public function getUserByUsername($username) {
-        $userData = DB::selectFirst("SELECT username FROM users WHERE username = ?", [$username]);
+        $userData = DB::selectFirst("SELECT id, username FROM users WHERE username = ?", [$username]);
         return $userData;
     }
 
