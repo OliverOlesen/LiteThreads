@@ -43,4 +43,23 @@ class Controller
             return $missing;
         }
     }
+
+    /*
+        This function takes a string and validates that it's a boolean.
+        If it's a bolean yes/true/1 it returns 1 or no/false/0 it returns 0.
+        Reason this was nessecary, is because the is_boolean function in php,
+        has more ways to validate a boolean than in mysql, so to stop it from breaking
+        the database if yes is submitted as a true valuable in the api this function
+        was created to change the value to either a 1 or a 0
+
+        If it's not a boolean, it returns a string. *is not a valid boolean*
+    */
+    protected function validateBoolean($value) {
+        $validBoolean = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        if ($validBoolean === null) {
+            return "is not a valid boolean";
+        }
+    
+        return (int)$validBoolean;
+    }
 }

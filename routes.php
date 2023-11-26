@@ -12,6 +12,7 @@
         return "Default route";        
     });
 
+    // User api's
     Route::get('/get_user_with_id', 'UsersController@GetUserById');
     Route::get('/users', 'UsersController@GetUsers');
     Route::get('/get_user_availability', 'UsersController@CheckUsernameEmailAvailable');
@@ -19,6 +20,14 @@
     Route::post('/verf_mail_code','UsersController@VerfMailCode');
     Route::post('/create_user', 'UsersController@CreateUser');
     Route::post('/login_user', 'UsersController@LoginUser');
+
+    // Group api's
+    Route::get('/get_users_followed_groups','GroupsController@GetUsersFollowedGroups');
+    Route::get('/get_users_followed_category_groups','GroupsController@GetUsersFollowedCategoryGroups');
+    Route::get('/create_new_group','GroupsController@CreateNewGroup');
+    Route::get('/follow_group','GroupsController@FollowGroup');
+    Route::get('/unfollow_group','GroupsController@UnfollowGroup');
+
     Route::get('/sendmail', 'MailsController@SendMail');
 
     //For testing purposes
