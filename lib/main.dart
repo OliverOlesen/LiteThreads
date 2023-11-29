@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:litethreads/views/login.dart';
+import 'package:litethreads/views/navigation.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,7 +24,9 @@ class _MyAppState extends State<MyApp> {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: Login(),
+      // home: Login(),
+      home:
+          PageNavigation(email: "", birthdate: "", username: "", password: ""),
     );
   }
 }

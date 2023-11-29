@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-Card groupCard(int i, String follow) {
+Card groupCard(int i, String category, String title, String follow) {
   return Card(
     color: Colors.white,
     // You can customize the appearance of the card using the properties below
@@ -19,9 +19,9 @@ Card groupCard(int i, String follow) {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            const Text(
-              'Category',
-              style: TextStyle(
+            Text(
+              category,
+              style: const TextStyle(
                 fontSize: 16.0,
               ),
             ),
@@ -29,9 +29,9 @@ Card groupCard(int i, String follow) {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Group Title',
-                  style: TextStyle(
+                Text(
+                  title,
+                  style: const TextStyle(
                     fontSize: 20.0,
                     fontWeight: FontWeight.bold,
                   ),

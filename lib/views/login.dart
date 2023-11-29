@@ -5,6 +5,7 @@ import 'package:litethreads/components/custom_spacer.dart';
 import 'package:litethreads/components/elevated_button.dart';
 import 'package:litethreads/components/fetch.dart';
 import 'package:litethreads/components/text_input.dart';
+import 'package:litethreads/models/post.dart';
 import 'package:litethreads/models/user.dart';
 import 'package:litethreads/views/create_user.dart';
 import 'package:litethreads/views/navigation.dart';
@@ -25,12 +26,14 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     void loginPressed() {
       if (_key.currentState!.validate()) {
-        String tempJsonBody = "";
+        dynamic jsonBody = {
+          "email": emailController.text,
+          "password": passController.text
+        };
 
         // Login Fetch
-        fetch("/", jsonEncode(tempJsonBody)).then((value) {
+        fetch("/login_user", jsonBody).then((value) {
           // If successful login then make fetch for followed posts for users and groups
-          // TODO make fetch for posts
 
           // Then login
           User u = User.fromJson(value);
