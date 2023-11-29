@@ -29,7 +29,19 @@
     Route::get('/create_new_group','GroupsController@CreateNewGroup');
     Route::get('/follow_group','GroupsController@FollowGroup');
     Route::get('/unfollow_group','GroupsController@UnfollowGroup');
-
+    
+    // Post api's
+    Route::get('/create_user_post','PostsController@CreateUserPost');
+    Route::get('/create_group_post','PostsController@CreateUserGroupPost');
+    Route::get('/vote_on_post','PostsController@VoteOnPost');
+    Route::get('/get_group_posts','PostsController@GetPostsFromGroup');
+    Route::get('/get_users_wall_post','PostsController@GetPostsFromSpecificUserWall');
+    Route::get('/get_users_post','PostsController@GetPostsFromSpecificUser');
+    Route::get('/get_user_category_posts','PostsController@GetPostsFromUsersFollowedCategories');
+    Route::get('/get_user_followed_groups_posts','PostsController@GetPostsFromFollowedGroups');
+    Route::get('/get_user_followed_users_posts','PostsController@GetPostsFromFollowedUsers');
+    Route::get('/get_user_followed_users_and_groups_posts','PostsController@GetPostsFromFollowedGroupsAndUsers');
+    
     Route::get('/sendmail', 'MailsController@SendMail');
 
     //For testing purposes
