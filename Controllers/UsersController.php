@@ -1,6 +1,13 @@
 <?php
 namespace Controllers;
 
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
+use Dotenv\Dotenv;
+$dotenv = Dotenv::createImmutable(ROOT_DIR);
+$dotenv->load();
+
 use Models\Users;
 use Models\Mailer;
 class UsersController extends Controller
@@ -162,9 +169,20 @@ class UsersController extends Controller
         if (!password_verify($_GET['password'], $result['password'])) {
             return $this->jsonErrorResponse("Password did not match");
         }
+        
+        $currentDateTime = date("Y-m-d H:i:s");
+        // Expirationdate on the jwtoken
+        $expirationDateTime = date("Y-m-d H:i:s", strtotime($currentDateTime . " +30 days"));
+        $key = $_ENV["JWT_KEY"];
 
-        //In the future this is the JWToken
-        $JWToken = "This is a JWToken";
-        return $this->jsonSuccessResponse($JWToken);
+        $payload = [
+        'username' => $result['username'],
+        'email' => $_GET['email'],
+        'jwt_expiration' => $expirationDateTime
+        ];
+
+        $jwt = JWT::encode($payload, $key, 'HS256');
+
+        return $this->jsonSuccessResponse($jwt);
     }
 }
