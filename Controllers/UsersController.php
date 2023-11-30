@@ -182,7 +182,9 @@ class UsersController extends Controller
         ];
 
         $jwt = JWT::encode($payload, $key, 'HS256');
+        $loginInfo['jwt'] = $jwt;
+        $loginInfo['user_info'] = ['username'=>$result['username'],'email'=>$_GET['email']];
 
-        return $this->jsonSuccessResponse($jwt);
+        return $this->jsonSuccessResponse($loginInfo);
     }
 }

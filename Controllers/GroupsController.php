@@ -130,7 +130,7 @@ class GroupsController extends Controller
             return $this->jsonSuccessResponse("User does not follow any groups");
 
         foreach ($followedGroups as $group) {
-            $groups['followed_groups'][] = $group['name'];
+            $groups['followed_groups'][] = $group;
         }
 
         return $this->jsonSuccessResponse($groups);
@@ -152,7 +152,7 @@ class GroupsController extends Controller
             return $this->jsonSuccessResponse("No groups with followed categories");
 
         foreach ($groupsInFollowedCategory as $group) {
-            $groups["groups_in_categories"][] = $group['name'];
+            $groups["groups_in_categories"][] = $group;
         }
 
         return $this->jsonSuccessResponse($groups);

@@ -193,7 +193,7 @@ class Posts extends DB {
         return $posts; 
     }
 
-    public function getPostsInSpecificGroup($group_id, $user_id) {
+    public function getPostsInSpecificGroup($user_id, $group_id) {
         $posts = DB::selectAll(
             "WITH VoteCounts AS (
                 SELECT
