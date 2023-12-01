@@ -256,11 +256,11 @@ class PostsController extends Controller
         if (!empty($error['invalid_value']))
             return $this->jsonErrorResponse($error);
 
-        $posts['Users'][] = $this->posts->getPostsFromFollowedUsersWall($validUser['id']);
+        $posts['Users'] = $this->posts->getPostsFromFollowedUsersWall($validUser['id']);
         if (empty($posts['Users'][0]))
             $posts['Users'] = "No posts from followed users";
 
-        $posts['Groups'][] = $this->posts->getPostsFromFollowedGroups($validUser['id']);
+        $posts['Groups'] = $this->posts->getPostsFromFollowedGroups($validUser['id']);
         if (empty($posts['Groups'][0]))
             $posts['Groups'] = "No posts from followed groups";
 
