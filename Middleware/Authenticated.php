@@ -23,11 +23,12 @@ class Authenticated implements IMiddleware
             it needs be changed to $_SERVER['HTTP_AUTHORIZATION'] instead of get
             since it's more secure, (value wont be logged, and much more)
         */
-        if (!isset($_GET['jwt'])) {
+        if (!isset($_SERVER['HTTP_AUTHORIZATION'])) {
             echo json_encode(['status' => 'failed', 'response' => 'no jwt']);
             die;
         }
-        $jwt = $_GET['jwt'];
+        
+        $jwt = $_SERVER['HTTP_AUTHORIZATION'];
         
         try {
                 // This is to make sure that there it's no more than X seconds since the request was made,
@@ -54,22 +55,22 @@ class Authenticated implements IMiddleware
             } catch (ExpiredException $e) {
                 // Token is expired. Handle accordingly.
                 http_response_code(401);
-                echo json_encode(['error' => 'Token expired']);
+                echo json_encode(['status' => 'failed', 'response' => 'Token expired']);
                 die;
             } catch (BeforeValidException $e) {
                 // Token is not yet valid. Handle accordingly.
                 http_response_code(401);
-                echo json_encode(['error' => 'Token not yet valid']);
+                echo json_encode(['status' => 'failed', 'response' => 'Token not yet valid']);
                 die;
             } catch (SignatureInvalidException $e) {
                 // Token signature is invalid, indicating possible tampering.
                 http_response_code(401);
-                echo json_encode(['error' => 'Invalid token signature']);
+                echo json_encode(['status' => 'failed', 'response' => 'Invalid token signature']);
                 die;
             } catch (\Throwable $e) {
                 // Catch any Throwable, including DomainException for malformed UTF-8 characters.
                 http_response_code(400);
-                echo json_encode(['error' => 'Malformed or invalid JWT']);
+                echo json_encode(['status' => 'failed', 'response' => 'Malformed or invalid JWT']);
                 die;
             } catch (\Exception $e) {
                 /*
@@ -78,7 +79,7 @@ class Authenticated implements IMiddleware
                     the following will be sent back as a response to the end-user.
                 */
                 http_response_code(400);
-                echo json_encode(['error' => 'Malformed or invalid JWT']);
+                echo json_encode(['status' => 'failed', 'response' => 'Malformed or invalid JWT']);
                 die;
             }
     }

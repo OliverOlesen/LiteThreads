@@ -26,30 +26,30 @@
     Route::get('/login_user', 'UsersController@LoginUser');
 
 
-    // Group api's
-    Route::get('/get_users_followed_groups','GroupsController@GetUsersFollowedGroups');
-    Route::get('/get_users_followed_category_groups','GroupsController@GetUsersFollowedCategoryGroups');
-    Route::get('/create_new_group','GroupsController@CreateNewGroup');
-    Route::get('/follow_group','GroupsController@FollowGroup');
-    Route::get('/unfollow_group','GroupsController@UnfollowGroup');
-    
-    // post api calls
-    Route::get('/create_user_post','PostsController@CreateUserPost');
-    Route::get('/create_group_post','PostsController@CreateUserGroupPost');
-    Route::get('/vote_on_post','PostsController@VoteOnPost');
-    Route::get('/get_group_posts','PostsController@GetPostsFromGroup');
-    Route::get('/get_users_wall_post','PostsController@GetPostsFromSpecificUserWall');
-    Route::get('/get_users_post','PostsController@GetPostsFromSpecificUser');
-    Route::get('/get_user_category_posts','PostsController@GetPostsFromUsersFollowedCategories');
-    Route::get('/get_user_followed_groups_posts','PostsController@GetPostsFromFollowedGroups');
-    Route::get('/get_user_followed_users_posts','PostsController@GetPostsFromFollowedUsers');
-    Route::get('/get_user_followed_users_and_groups_posts','PostsController@GetPostsFromFollowedGroupsAndUsers');
     
     // These routes are only available if a valid JWToken is sent with the request (For now as a get(provider issues))
     Route::group(['middleware' => Authenticated::class], function () {
         // Most of these requests should be post requests, but because of hosting provider difficulties
         // they have been set and updated to be get requests
         
+        // Group api's
+        Route::get('/get_users_followed_groups','GroupsController@GetUsersFollowedGroups');
+        Route::get('/get_users_followed_category_groups','GroupsController@GetUsersFollowedCategoryGroups');
+        Route::get('/create_new_group','GroupsController@CreateNewGroup');
+        Route::get('/follow_group','GroupsController@FollowGroup');
+        Route::get('/unfollow_group','GroupsController@UnfollowGroup');
+        
+        // post api calls
+        Route::get('/create_user_post','PostsController@CreateUserPost');
+        Route::get('/create_group_post','PostsController@CreateUserGroupPost');
+        Route::get('/vote_on_post','PostsController@VoteOnPost');
+        Route::get('/get_group_posts','PostsController@GetPostsFromGroup');
+        Route::get('/get_users_wall_post','PostsController@GetPostsFromSpecificUserWall');
+        Route::get('/get_users_post','PostsController@GetPostsFromSpecificUser');
+        Route::get('/get_user_category_posts','PostsController@GetPostsFromUsersFollowedCategories');
+        Route::get('/get_user_followed_groups_posts','PostsController@GetPostsFromFollowedGroups');
+        Route::get('/get_user_followed_users_posts','PostsController@GetPostsFromFollowedUsers');
+        Route::get('/get_user_followed_users_and_groups_posts','PostsController@GetPostsFromFollowedGroupsAndUsers');
     });
         
 
