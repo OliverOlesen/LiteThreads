@@ -60,8 +60,8 @@ class Groups extends DB {
 
     public function getSpecificCategory($category) {
         $category = DB::selectFirst(
-            "SELECT id FROM category
-            WHERE category_name = ?", [$category]);
+            "SELECT c.id FROM categories AS c
+            WHERE c.name = ?", [$category]);
 
         return $category;
     }
