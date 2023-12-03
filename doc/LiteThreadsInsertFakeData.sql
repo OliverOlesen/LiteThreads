@@ -9,7 +9,7 @@ VALUES
     ('john_doe', 'johns_pass', 'john.doe@example.com', '2000-10-10', false),
     ('jane_doe', 'janes_pass', 'jane.doe@example.com', '1998-08-08', false);
     
--- Insert into category
+-- Insert into categories
 INSERT INTO categories (id, name)
 VALUES 
     (1, 'Technology'),

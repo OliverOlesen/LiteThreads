@@ -18,7 +18,7 @@ CREATE TABLE users (
 );
 
 
--- Table: category
+-- Table: categories
 CREATE TABLE categories (
     id INT UNIQUE,
     name VARCHAR(255),
@@ -37,7 +37,7 @@ CREATE TABLE `groups` (
     latest_update DATE,
     archived_date DATE,
     PRIMARY KEY (id),
-    FOREIGN KEY (category_id) REFERENCES category(id)
+    FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
 -- Table: posts
@@ -118,7 +118,7 @@ CREATE TABLE users_followed_categories (
     user_id INT,
     category_id INT,
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (category_id) REFERENCES category(id)
+    FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
 -- Table: email_authentication
