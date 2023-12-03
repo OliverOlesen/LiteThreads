@@ -24,13 +24,17 @@
     Route::get('/verf_mail_code','UsersController@VerfMailCode');
     Route::get('/create_user', 'UsersController@CreateUser');
     Route::get('/login_user', 'UsersController@LoginUser');
-
-
+    
+    
     
     // These routes are only available if a valid JWToken is sent with the request (For now as a get(provider issues))
     Route::group(['middleware' => Authenticated::class], function () {
         // Most of these requests should be post requests, but because of hosting provider difficulties
         // they have been set and updated to be get requests
+
+        // Followed Users api
+        Route::get('/follow_unfollow_user', 'UsersController@FollowUnfollowUser');
+        Route::get('/get_followed_users', 'UsersController@GetFollowedUsers');
         
         // Group api's
         Route::get('/get_users_followed_groups','GroupsController@GetUsersFollowedGroups');
@@ -39,7 +43,7 @@
         Route::get('/follow_group','GroupsController@FollowGroup');
         Route::get('/unfollow_group','GroupsController@UnfollowGroup');
         
-        // post api calls
+        // Post api calls
         Route::get('/create_user_post','PostsController@CreateUserPost');
         Route::get('/create_group_post','PostsController@CreateUserGroupPost');
         Route::get('/vote_on_post','PostsController@VoteOnPost');

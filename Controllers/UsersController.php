@@ -187,4 +187,61 @@ class UsersController extends Controller
 
         return $this->jsonSuccessResponse($loginInfo);
     }
+
+    // The following is in regards to following users unfollowing etc.
+    public function FollowUnfollowUser() {
+        $requiredValues = ['username', 'follow_username'];
+        $missingValues = $this->checkRequiredValues($requiredValues);
+        if ($missingValues)
+            return $this->jsonErrorResponse($missingValues);
+
+        $validUser = $this->users->getUserByUsername($_GET['username']);
+        if (empty($validUser))
+            $error['invalid_value'][] = "User";
+
+        $validFollowUser = $this->users->getUserByUsername($_GET['follow_username']);
+        if (empty($validFollowUser))
+            $error['invalid_value'][] = "follow_user";
+
+        if (!empty($error['invalid_value']))
+            return $this->jsonErrorResponse($error);
+
+        $alreadyFollow = $this->users->userAlreadyFollowed($validUser['id'], $validFollowUser['id']);
+        if (!empty($alreadyFollow)) {
+            $unfollowed = $this->users->unfollowUser($validUser['id'], $validFollowUser['id']);
+            if ($unfollowed) {
+                return $this->jsonSuccessResponse("User was unfollowed");
+            } else {
+                return $this->jsonErrorResponse("User is already follow, but could not be unfollowed)");
+            }
+        }
+
+        $followUser = $this->users->followUser($validUser['id'], $validFollowUser['id']);
+        if (!$followUser)
+            return $this->jsonErrorResponse("User could not be followed");
+
+        return $this->jsonSuccessResponse("User was followed");
+    }
+
+    public function GetFollowedUsers () {
+        $requiredValues = ['username'];
+        $missingValues = $this->checkRequiredValues($requiredValues);
+        if ($missingValues)
+            return $this->jsonErrorResponse($missingValues);
+
+
+        $validUser = $this->users->getUserByUsername($_GET['username']);
+        if (empty($validUser))
+            $error['invalid_value'] = "User";
+
+        if (!empty($error['invalid_value']))
+        return $this->jsonErrorResponse($error);
+
+        $followedUsers = $this->users->getFollowedUsers($validUser['id']);
+        if (empty($followedUsers))
+            return $this->jsonSuccessResponse("No followed users");
+
+        return $this->jsonSuccessResponse($followedUsers);
+
+    }
 }
