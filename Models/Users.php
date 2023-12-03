@@ -66,4 +66,42 @@ class Users extends DB {
         $request = DB::delete("DELETE FROM email_verification WHERE email = ?", [$email]);
         return $request;
     }
+
+    // The following is in regards to following users unfollowing etc.
+    public function followUser($user_id, $follow_user_id) {
+        $userFollowData = DB::insert(
+            "INSERT INTO followed_users (user_id, followed_user_id)
+            VALUES (?,?)", 
+            [$user_id, $follow_user_id]);
+            
+        return $userFollowData;
+    }
+
+    public function userAlreadyFollowed($user_id, $follow_user_id) {
+        $followedUser = DB::selectFirst(
+            "SELECT * FROM followed_users
+            WHERE user_id = ? AND followed_user_id = ?", [$user_id, $follow_user_id]);
+
+        return $followedUser;
+    }
+
+    public function unfollowUser($user_id, $unfollow_user_id) {
+        $unfollowedUser = DB::delete(
+            "DELETE FROM followed_users
+            WHERE user_id = ? AND followed_user_id = ?", 
+            [$user_id, $unfollow_user_id]);
+            
+        return $unfollowedUser;
+    }
+
+    public function getFollowedUsers($user_id) {
+        $followedUsers = DB::selectAll(
+            "SELECT u.username
+            FROM followed_users AS fu
+            INNER JOIN users u
+            ON u.id = fu.followed_user_id
+            WHERE fu.user_id = ?", [$user_id]);
+
+        return $followedUsers;
+    }
 }
