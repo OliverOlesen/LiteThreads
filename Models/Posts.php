@@ -169,6 +169,7 @@ class Posts extends DB {
                 p.id,
                 u.username,
                 g.name AS group_name,
+                c.name AS category_name,
                 p.title,
                 p.content,
                 p.creation_date,
@@ -178,17 +179,26 @@ class Posts extends DB {
             FROM
                 posts p
             INNER JOIN
-                followed_groups fg ON p.user_id = fg.user_id
+                users u ON u.id = p.user_id
             INNER JOIN
-                users u ON u.id = fg.user_id
+                `groups` g ON g.id = p.group_id
             INNER JOIN
-            	 `groups` g ON g.id = p.group_id
+                categories c ON c.id = g.category_id
             LEFT JOIN
                 VoteCounts vc ON p.id = vc.post_id
             LEFT JOIN
                 users_posts_votes upv ON p.id = upv.post_id AND upv.user_id = ?
             WHERE
-                fg.user_id = ? AND p.is_archived = false", [$user_id, $user_id]);
+                p.is_archived = false
+                AND p.group_id IS NOT NULL
+                AND p.group_id IN (
+                    SELECT id
+						  FROM posts p
+						  WHERE p.group_id IN (
+						  SELECT group_id
+						  FROM followed_groups fg
+						  WHERE fg.user_id = ?
+                    ))", [$user_id, $user_id]);
 
         return $posts; 
     }
