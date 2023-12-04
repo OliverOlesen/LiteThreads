@@ -20,7 +20,7 @@ class Users extends DB {
     }
 
     public function getUserCredByMail($email) {
-        $userData = DB::selectFirst("SELECT username, password FROM users WHERE email = ?", [$email]);
+        $userData = DB::selectFirst("SELECT id, username, password FROM users WHERE email = ?", [$email]);
         return $userData;
     }
 
@@ -41,6 +41,15 @@ class Users extends DB {
             [$username, $password, $email, $birthdate]);
             
         return $userData;
+    }
+
+    public function archiveUser($user_id) {
+        $userArchived = DB::update(
+            "UPDATE users
+            SET is_archived = TRUE
+            WHERE id = ?",[$user_id]);
+
+        return $userArchived;
     }
 
     public function createEmailVerf($email, $verf_code) {

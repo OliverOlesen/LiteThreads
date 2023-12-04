@@ -7,10 +7,12 @@ class GroupsController extends Controller
 {
     private $groups;
     private $users;
+    private $jwtInfo;
 
     public function __construct() {
         $this->users = new Users();
         $this->groups = new Groups();
+        $this->jwtInfo = $this->decodeJwt();
     }
 
     public function CreateNewGroup() {
@@ -156,6 +158,42 @@ class GroupsController extends Controller
         }
 
         return $this->jsonSuccessResponse($groups);
+    }
+
+    public function ArchiveGroup() {
+        $requiredValues = ['group_name'];
+        $missingValues = $this->checkRequiredValues($requiredValues);
+        if ($missingValues) {
+            return $this->jsonErrorResponse($missingValues);
+        }
+
+        $validGroup = $this->groups->getGroupWithName($_GET['group_name']);
+        if (empty($validGroup))
+            $error['not_found'][] = "Group";
+
+        if (isset($error) && !empty($error))
+            return $this->jsonErrorResponse($error);
+
+        $groupModerator = $this->groups->getGroupModerator($validGroup['id']);
+        if (empty($groupModerator))
+            return $this->jsonErrorResponse("No moderator for group");
+
+        if ($groupModerator['user_id'] !== $this->jwtInfo['user_id'])
+            return $this->jsonErrorResponse("not owner of group");
+
+        if ($validGroup['is_archived'] == false) {
+            $archivedGroup = $this->groups->archiveGroup($validGroup['id']);
+            if (!$archivedGroup)
+                return $this->jsonErrorResponse("Group could not be archived");
+    
+            return $this->jsonSuccessResponse("Group was archived");
+        } else {
+            $unarchivedGroup = $this->groups->unarchiveGroup($validGroup['id']);
+            if (!$unarchivedGroup)
+                return $this->jsonErrorResponse("Group could not be unarchived");
+    
+            return $this->jsonSuccessResponse("Group was unarchived");
+        }
     }
 
 }

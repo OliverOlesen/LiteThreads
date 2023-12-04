@@ -33,10 +33,12 @@
         // they have been set and updated to be get requests
 
         // Followed Users api
+        Route::get('/archive_user', 'UsersController@ArchiveUser');
         Route::get('/follow_unfollow_user', 'UsersController@FollowUnfollowUser');
         Route::get('/get_followed_users', 'UsersController@GetFollowedUsers');
         
         // Group api's
+        Route::get('/archive_group', 'GroupsController@ArchiveGroup');
         Route::get('/get_users_followed_groups','GroupsController@GetUsersFollowedGroups');
         Route::get('/get_users_followed_category_groups','GroupsController@GetUsersFollowedCategoryGroups');
         Route::get('/create_new_group','GroupsController@CreateNewGroup');
@@ -44,6 +46,7 @@
         Route::get('/unfollow_group','GroupsController@UnfollowGroup');
         
         // Post api calls
+        Route::get('/archive_post', 'PostsController@ArchivePost');
         Route::get('/create_user_post','PostsController@CreateUserPost');
         Route::get('/create_group_post','PostsController@CreateUserGroupPost');
         Route::get('/vote_on_post','PostsController@VoteOnPost');
