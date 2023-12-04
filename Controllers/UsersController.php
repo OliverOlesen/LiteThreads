@@ -10,6 +10,7 @@ $dotenv->load();
 
 use Models\Users;
 use Models\Mailer;
+use Models\Categories;
 class UsersController extends Controller
 {
     private $users;
@@ -17,6 +18,7 @@ class UsersController extends Controller
 
     public function __construct() {
         $this->users = new Users();
+        $this->categories = new Categories();
         $this->jwtInfo = $this->decodeJwt();
     }
 
