@@ -16,7 +16,7 @@ class GroupsController extends Controller
     }
 
     public function CreateNewGroup() {
-        $requiredValues = ['username', 'name', 'category_name', 'is_private', 'is_age_restricted'];
+        $requiredValues = ['name', 'category_name', 'is_private', 'is_age_restricted'];
         $missingValues = $this->checkRequiredValues($requiredValues);
         if ($missingValues) {
             return $this->jsonErrorResponse($missingValues);
@@ -39,10 +39,6 @@ class GroupsController extends Controller
         if (!empty($errors))
             return $this->jsonErrorResponse($errors);
 
-        $userToMod = $this->users->getUserByUsername($_GET['username']);
-        if (empty($userToMod))
-            return $this->jsonErrorResponse("Not A valid user");
-
         $newGroup = $this->groups->createGroup($_GET['name'], $categoryExists['id'], $validBoolean['is_private'], $validBoolean['is_age_restricted']);
         if (!$newGroup)
             return $this->jsonErrorResponse("Group could not be created");
@@ -51,21 +47,17 @@ class GroupsController extends Controller
         if (empty($group))
             return $this->jsonErrorResponse("Group does not exist");
         
-        $groupModerator = $this->groups->createGroupModerator($group['id'], $userToMod['id']);
+        $groupModerator = $this->groups->createGroupModerator($group['id'], $this->jwtInfo['user_id']);
         
         return $this->jsonSuccessResponse("Group was created");
     }
 
     public function FollowGroup() {
-        $requiredValues = ['username', 'group_name'];
+        $requiredValues = ['group_name'];
         $missingValues = $this->checkRequiredValues($requiredValues);
         if ($missingValues) {
             return $this->jsonErrorResponse($missingValues);
         }
-
-        $user = $this->users->getUserIdByUsername($_GET['username']);
-        if (empty($user))
-            $error['not_found'][] = "User";
 
         $group = $this->groups->getGroupWithName($_GET['group_name']);
         if (empty($group))
@@ -75,11 +67,11 @@ class GroupsController extends Controller
         if (isset($error) && !empty($error))
             return $this->jsonErrorResponse($error);
 
-        $groupAlreadyFollowed = $this->groups->getUsersSpecificFollowedGroup($user['id'], $group['id']);
+        $groupAlreadyFollowed = $this->groups->getUsersSpecificFollowedGroup($this->jwtInfo['user_id'], $group['id']);
         if (!empty($groupAlreadyFollowed))
             return $this->jsonSuccessResponse("Group already followed");
 
-        $groupFollowed = $this->groups->followGroup($user['id'], $group['id']);
+        $groupFollowed = $this->groups->followGroup($this->jwtInfo['user_id'], $group['id']);
         if (empty($groupFollowed))
             return $this->jsonErrorResponse("Group could not be followed");
 
@@ -87,47 +79,32 @@ class GroupsController extends Controller
     }
 
     public function UnfollowGroup() {
-        $requiredValues = ['username', 'group_name'];
+        $requiredValues = ['group_name'];
         $missingValues = $this->checkRequiredValues($requiredValues);
         if ($missingValues) {
             return $this->jsonErrorResponse($missingValues);
         }
 
-        $user = $this->users->getUserIdByUsername($_GET['username']);
-        if (empty($user))
-            $error['not_found'][] = "User";
-
         $group = $this->groups->getGroupWithName($_GET['group_name']);
         if (empty($group))
             $error['not_found'][] = "Group";
 
-
         if (isset($error) && !empty($error))
             return $this->jsonErrorResponse($error);
 
-        $groupAlreadyFollowed = $this->groups->getUsersSpecificFollowedGroup($user['id'], $group['id']);
+        $groupAlreadyFollowed = $this->groups->getUsersSpecificFollowedGroup($this->jwtInfo['user_id'], $group['id']);
         if (empty($groupAlreadyFollowed))
             return $this->jsonSuccessResponse("Group is not followed");
 
-        $unfollowed = $this->groups->unfollowGroup($user['id'], $group['id']);
+        $unfollowed = $this->groups->unfollowGroup($this->jwtInfo['user_id'], $group['id']);
         if (empty($unfollowed))
             return $this->jsonErrorResponse("Group could not be unfollowed");
 
         return $this->jsonSuccessResponse("Group was unfollowed");
     }
 
-    public function GetUsersFollowedGroups() {
-        $requiredValues = ['username'];
-        $missingValues = $this->checkRequiredValues($requiredValues);
-        if ($missingValues) {
-            return $this->jsonErrorResponse($missingValues);
-        }
-
-        $userId = $this->users->getUserIdByUsername($_GET['username']);
-        if (empty($userId))
-            return $this->jsonErrorResponse("User does not exist");
-        
-        $followedGroups = $this->groups->getUsersFollowedGroups($userId['id']);
+    public function GetUsersFollowedGroups() {        
+        $followedGroups = $this->groups->getUsersFollowedGroups($this->jwtInfo['user_id']);
         if (empty($followedGroups))
             return $this->jsonSuccessResponse("User does not follow any groups");
 
@@ -139,17 +116,7 @@ class GroupsController extends Controller
     }
 
     public function GetUsersFollowedCategoryGroups() {
-        $requiredValues = ['username'];
-        $missingValues = $this->checkRequiredValues($requiredValues);
-        if ($missingValues) {
-            return $this->jsonErrorResponse($missingValues);
-        }
-
-        $userExists = $this->users->getUserByUsername($_GET['username']);
-        if (empty($userExists))
-            return $this->jsonErrorResponse("User does not exist"); 
-
-        $groupsInFollowedCategory = $this->groups->getUserFollowedCategoryGroups($userExists['id']);
+        $groupsInFollowedCategory = $this->groups->getUserFollowedCategoryGroups($this->jwtInfo['user_id']);
         if (empty($groupsInFollowedCategory))
             return $this->jsonSuccessResponse("No groups with followed categories");
 
