@@ -1,6 +1,12 @@
 <?php
-
 namespace Controllers;
+
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
+use Dotenv\Dotenv;
+$dotenv = Dotenv::createImmutable(ROOT_DIR);
+$dotenv->load();
 
 class Controller
 {
@@ -61,5 +67,21 @@ class Controller
         }
     
         return (int)$validBoolean;
+    }
+
+    protected function decodeJwt() {
+        /*
+            if the jwt hasn't been set, return null.
+            this way decodeJwt in the __construct of the different controllers
+            will only be filled out when the value is set, otherwise it will be null.
+
+            This is nessecary to make the code cleaner, by getting around doing a lot of repetition
+        */
+        if ($_SERVER['HTTP_AUTHORIZATION'] == "")
+            return null;
+        
+        $decoded = JWT::decode($_SERVER['HTTP_AUTHORIZATION'], new Key($_ENV["JWT_KEY"], 'HS256'));
+        $decodedArray = (array) $decoded;
+        return $decodedArray;
     }
 }

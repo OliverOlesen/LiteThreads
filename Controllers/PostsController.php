@@ -8,11 +8,14 @@ class PostsController extends Controller
 {
     private $groups;
     private $users;
+    private $posts;
+    private $jwtInfo;
 
     public function __construct() {
         $this->users = new Users();
         $this->groups = new Groups();
         $this->posts = new Posts();
+        $this->jwtInfo = $this->decodeJwt();
     }
 
     public function CreateUserPost() {
@@ -57,6 +60,38 @@ class PostsController extends Controller
             return $this->jsonErrorResponse("Post could not be created");
 
         return $this-> jsonSuccessResponse("Post was created under group");
+    }
+
+    public function ArchivePost() {
+        $requiredValues = ['post_id'];
+        $missingValues = $this->checkRequiredValues($requiredValues);
+        if ($missingValues) {
+            return $this->jsonErrorResponse($missingValues);
+        }
+
+        $validPost = $this->posts->getPostCred($_GET['post_id']);
+        if (empty($validPost))
+            $error['not_found'][] = "Post";
+
+        if (isset($error) && !empty($error))
+            return $this->jsonErrorResponse($error);
+
+        if ($validPost['user_id'] !== $this->jwtInfo['user_id'])
+            return $this->jsonErrorResponse("not owner of post");
+
+        if ($validPost['is_archived'] == false) {
+            $archivedPost = $this->posts->archivePost($_GET['post_id']);
+            if (!$archivedPost)
+                return $this->jsonErrorResponse("Post could not be archived");
+        
+            return $this->jsonSuccessResponse("Post was archived");
+        } else {
+            $unarchived = $this->posts->unarchivePost($_GET['post_id']);
+            if (!$unarchived)
+                return $this->jsonErrorResponse("Post could not be unarchived");
+        
+            return $this->jsonSuccessResponse("Post was unarchived");
+        }
     }
 
     public function VoteOnPost() {

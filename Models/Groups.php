@@ -13,6 +13,24 @@ class Groups extends DB {
         return $groupData;
     }
 
+    public function archiveGroup($group_id) {
+        $groupArchived = DB::update(
+            "UPDATE `groups`
+            SET is_archived = true
+            WHERE id = ?",[$group_id]);
+
+        return $groupArchived;
+    }
+
+    public function unarchiveGroup($group_id) {
+        $groupArchived = DB::update(
+            "UPDATE `groups`
+            SET is_archived = false
+            WHERE id = ?",[$group_id]);
+
+        return $groupArchived;
+    }
+
     public function followGroup($user_id, $group_id) {
         $groupData = DB::insert(
             "INSERT INTO followed_groups (user_id, group_id)
@@ -52,7 +70,7 @@ class Groups extends DB {
 
     public function getGroupWithName($group_name) {
         $group = DB::selectFirst(
-            "SELECT id FROM `groups`
+            "SELECT id, is_archived FROM `groups`
             WHERE NAME = ?", [$group_name]);
 
         return $group;
@@ -75,13 +93,13 @@ class Groups extends DB {
         return $groupData;
     }
 
-    public function getGroupModerator($group_id, $user_id) {
+    public function getGroupModerator($group_id) {
         $groupModerator = DB::selectFirst(
-            "SELECT u.username AS user 
+            "SELECT u.id AS user_id
             FROM group_moderators AS gm
             INNER JOIN users AS u
             ON u.id = gm.user_id
-            WHERE gm.group_id = ? AND gm.user_id = ?", [$group_id, $user_id]);
+            WHERE gm.group_id = ?", [$group_id]);
 
         return $groupModerator;
     }

@@ -13,9 +13,11 @@ use Models\Mailer;
 class UsersController extends Controller
 {
     private $users;
+    private $jwtInfo;
 
     public function __construct() {
         $this->users = new Users();
+        $this->jwtInfo = $this->decodeJwt();
     }
 
     public function GetUserById() {
@@ -176,6 +178,7 @@ class UsersController extends Controller
         $key = $_ENV["JWT_KEY"];
 
         $payload = [
+        'user_id' => $result['id'],
         'username' => $result['username'],
         'email' => $_GET['email'],
         'jwt_expiration' => $expirationDateTime
@@ -186,6 +189,14 @@ class UsersController extends Controller
         $loginInfo['user_info'] = ['username'=>$result['username'],'email'=>$_GET['email']];
 
         return $this->jsonSuccessResponse($loginInfo);
+    }
+
+    public function ArchiveUser() {
+        $userArchived = $this->users->archiveUser($this->jwtInfo['user_id']);
+        if (!$userArchived)
+            return $this->jsonErrorResponse("User could not be archived.");
+
+        return $this->jsonSuccessResponse("User was archived");
     }
 
     // The following is in regards to following users unfollowing etc.

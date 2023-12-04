@@ -30,10 +30,31 @@ class Posts extends DB {
         return $postInfo;
     }
 
+    public function getPostCred($post_id) {
+        $postInfo = DB::selectFirst(
+            "SELECT p.id post_id, u.id user_id, g.id group_id, p.is_archived FROM posts p
+            LEFT JOIN users u
+            ON u.id = p.user_id
+            LEFT JOIN `groups` g
+            ON g.id = p.group_id
+            WHERE p.id = ?", [$post_id]);
+
+        return $postInfo;
+    }
+
     public function archivePost($post_id) {
         $postArchived = DB::update(
             "UPDATE posts
             SET is_archived = TRUE
+            WHERE id = ?",[$post_id]);
+
+        return $postArchived;
+    }
+
+    public function unarchivePost($post_id) {
+        $postArchived = DB::update(
+            "UPDATE posts
+            SET is_archived = false
             WHERE id = ?",[$post_id]);
 
         return $postArchived;

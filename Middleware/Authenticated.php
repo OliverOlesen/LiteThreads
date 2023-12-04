@@ -35,8 +35,7 @@ class Authenticated implements IMiddleware
                 // if more time than this has passed, it will fail.
                 JWT::$leeway = 30; // $leeway in seconds
                 $decoded = JWT::decode($jwt, new Key($_ENV["JWT_KEY"], 'HS256'));
-                $decoded_array = (array) $decoded;
-
+                $decodedArray = (array) $decoded;
                 /*
                     The following section is to make sure the same token is not in circulation for too long.
                     Since a new token is generated every time a user logs in, it should not become a problem,
@@ -45,7 +44,7 @@ class Authenticated implements IMiddleware
                     forces the user to login again, or they can't make requests to in this case,
                     any routes which make use of the Authenticated middleware.
                 */
-                $jwtIsExpired = $decoded_array['jwt_expiration'];
+                $jwtIsExpired = $decodedArray['jwt_expiration'];
                 $currentDateTime = date("Y-m-d H:i:s");
                 if ($currentDateTime > $jwtIsExpired) {
                     echo json_encode(['status' => 'failed', 'response' => 'JWToken has expired']);
