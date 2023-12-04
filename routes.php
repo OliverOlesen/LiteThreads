@@ -36,7 +36,12 @@
         Route::get('/archive_user', 'UsersController@ArchiveUser');
         Route::get('/follow_unfollow_user', 'UsersController@FollowUnfollowUser');
         Route::get('/get_followed_users', 'UsersController@GetFollowedUsers');
-        
+
+        // Categories api's
+        Route::get('/get_categories', 'CategoriesController@GetCategories');
+        Route::get('/get_users_followed_categories', 'CategoriesController@GetUsersFollowedCategories');
+        Route::get('/user_follow_unfollow_category', 'CategoriesController@userFollowUnfollowCategory');
+
         // Group api's
         Route::get('/archive_group', 'GroupsController@ArchiveGroup');
         Route::get('/get_users_followed_groups','GroupsController@GetUsersFollowedGroups');
