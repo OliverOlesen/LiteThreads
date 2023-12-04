@@ -103,14 +103,27 @@ class GroupsController extends Controller
         return $this->jsonSuccessResponse("Group was unfollowed");
     }
 
-    public function GetUsersFollowedGroups() {        
+    public function GetUsersFollowedAndModeratedGroups() {        
         $followedGroups = $this->groups->getUsersFollowedGroups($this->jwtInfo['user_id']);
-        if (empty($followedGroups))
-            return $this->jsonSuccessResponse("User does not follow any groups");
-
-        foreach ($followedGroups as $group) {
-            $groups['followed_groups'][] = $group;
+        $moderatedGroups = $this->groups->getUsersModeratedGroups($this->jwtInfo['user_id']);
+        
+        if (empty($followedGroups)) {
+            $groups['followed_groups'] = "User does not follow any groups";
+        } else {
+            foreach ($followedGroups as $group) {
+                $groups['followed_groups'][] = $group;
+            }
         }
+
+        if (empty($moderatedGroups)) {
+            $groups['moderated_groups'] = "User does not moderate any groups";
+        } else {
+            foreach ($moderatedGroups as $group) {
+                $groups['moderated_groups'][] = $group;
+            }
+        }        
+
+    
 
         return $this->jsonSuccessResponse($groups);
     }
