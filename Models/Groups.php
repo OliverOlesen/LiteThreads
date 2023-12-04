@@ -68,6 +68,17 @@ class Groups extends DB {
         return $groups;
     }
 
+    public function getUsersModeratedGroups($user_id) {
+        $moderatedGroups = DB::selectAll(
+            "SELECT g.name group_name 
+            FROM group_moderators gm
+            INNER JOIN `groups` g
+            ON g.id = gm.group_id
+            WHERE gm.user_id = ?", [$user_id]);
+
+        return $moderatedGroups;
+    }
+
     public function getGroupWithName($group_name) {
         $group = DB::selectFirst(
             "SELECT id, is_archived FROM `groups`

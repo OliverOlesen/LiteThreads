@@ -44,7 +44,7 @@
 
         // Group api's
         Route::get('/archive_group', 'GroupsController@ArchiveGroup');
-        Route::get('/get_users_followed_groups','GroupsController@GetUsersFollowedGroups');
+        Route::get('/get_users_followed_and_moderated_groups','GroupsController@GetUsersFollowedAndModeratedGroups');
         Route::get('/get_users_followed_category_groups','GroupsController@GetUsersFollowedCategoryGroups');
         Route::get('/create_new_group','GroupsController@CreateNewGroup');
         Route::get('/follow_group','GroupsController@FollowGroup');
