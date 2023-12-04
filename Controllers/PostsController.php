@@ -19,18 +19,13 @@ class PostsController extends Controller
     }
 
     public function CreateUserPost() {
-        $requiredValues = ['username', 'title', 'content'];
+        $requiredValues = ['title', 'content'];
         $missingValues = $this->checkRequiredValues($requiredValues);
         if ($missingValues) {
             return $this->jsonErrorResponse($missingValues);
         }
 
-        $validUser = $this->users->getUserByUsername($_GET['username']);
-        if (empty($validUser)) {
-            return $this->jsonErrorResponse("User does not exist");
-        }
-
-        $createPost = $this->posts->createUserPost($validUser['id'], $_GET['title'], $_GET['content']);
+        $createPost = $this->posts->createUserPost($this->jwtInfo['user_id'], $_GET['title'], $_GET['content']);
         if (!$createPost)
             return $this->jsonErrorResponse("Post could not be created");
 
@@ -38,15 +33,11 @@ class PostsController extends Controller
     }
 
     public function CreateUserGroupPost() {
-        $requiredValues = ['username', 'group_name', 'title', 'content'];
+        $requiredValues = ['group_name', 'title', 'content'];
         $missingValues = $this->checkRequiredValues($requiredValues);
         if ($missingValues) {
             return $this->jsonErrorResponse($missingValues);
         }
-
-        $validUser = $this->users->getUserByUsername($_GET['username']);
-        if (empty($validUser))
-            $error['invalid_value'][] = "User";
 
         $validGroup = $this->groups->getGroupWithName($_GET['group_name']);
         if (empty($validGroup))
@@ -55,7 +46,7 @@ class PostsController extends Controller
         if (!empty($error['invalid_value']))
             return $this->jsonErrorResponse($error);
 
-        $createPost = $this->posts->createUserGroupPost($validUser['id'], $validGroup['id'], $_GET['title'], $_GET['content']);
+        $createPost = $this->posts->createUserGroupPost($this->jwtInfo['user_id'], $validGroup['id'], $_GET['title'], $_GET['content']);
         if (!$createPost)
             return $this->jsonErrorResponse("Post could not be created");
 
@@ -95,15 +86,11 @@ class PostsController extends Controller
     }
 
     public function VoteOnPost() {
-        $requiredValues = ['username', 'post_id', 'reaction_like'];
+        $requiredValues = ['post_id', 'reaction_like'];
         $missingValues = $this->checkRequiredValues($requiredValues);
         if ($missingValues) {
             return $this->jsonErrorResponse($missingValues);
         }
-
-        $validUser = $this->users->getUserByUsername($_GET['username']);
-        if (empty($validUser))
-            $errors['invalid_value'][] = "User";
 
         $validPost = $this->posts->getPost($_GET['post_id']);
         if (empty($validPost))
@@ -119,19 +106,19 @@ class PostsController extends Controller
         if (!empty($errors['invalid_value']))
             return $this->jsonErrorResponse($errors);
 
-        $userAlreadyVoted = $this->posts->postAlreadyVotedOn($validUser['id'], $validPost['id']);
+        $userAlreadyVoted = $this->posts->postAlreadyVotedOn($this->jwtInfo['user_id'], $validPost['id']);
         // If the user votes the same value, that it has already voted on the post, erase the vote on the post
         if (!empty($userAlreadyVoted)) {
             if($userAlreadyVoted['reaction_like'] == $validBoolean['reaction_like']) {
-                $voteRevoked = $this->posts->revokePostVote($validUser['id'], $validPost['id']);
+                $voteRevoked = $this->posts->revokePostVote($this->jwtInfo['user_id'], $validPost['id']);
                 return $this->jsonSuccessResponse("Post vote revoked");
             } else {
-                $voteUpdated = $this->posts->updatePostVote($validUser['id'], $validPost['id'], $validBoolean['reaction_like']);
+                $voteUpdated = $this->posts->updatePostVote($this->jwtInfo['user_id'], $validPost['id'], $validBoolean['reaction_like']);
                 return $this->jsonSuccessResponse("Post vote was changed");
             }
         }
 
-        $postVotedOn = $this->posts->voteOnPost($validUser['id'], $validPost['id'], $validBoolean['reaction_like']);
+        $postVotedOn = $this->posts->voteOnPost($this->jwtInfo['user_id'], $validPost['id'], $validBoolean['reaction_like']);
         if (!$postVotedOn) {
             return $this->jsonErrorResponse("Could not vote on post");
         }
@@ -140,15 +127,11 @@ class PostsController extends Controller
     }
 
     public function GetPostsFromGroup() {
-        $requiredValues = ['username', 'group_name'];
+        $requiredValues = ['group_name'];
         $missingValues = $this->checkRequiredValues($requiredValues);
         if ($missingValues) {
             return $this->jsonErrorResponse($missingValues);
         }
-
-        $validUser = $this->users->getUserByUsername($_GET['username']);
-        if (empty($validUser))
-            $error['invalid_value'][] = "User";
 
         $validGroup = $this->groups->getGroupWithName($_GET['group_name']);
         if (empty($validGroup))
@@ -157,7 +140,7 @@ class PostsController extends Controller
         if (!empty($error['invalid_value']))
             return $this->jsonErrorResponse($error);
 
-        $posts = $this->posts->getPostsInSpecificGroup($validUser['id'], $validGroup['id']);
+        $posts = $this->posts->getPostsInSpecificGroup($this->jwtInfo['user_id'], $validGroup['id']);
         if (empty($posts))
             return $this->jsonSuccessResponse("No posts in that group");
 
@@ -165,15 +148,11 @@ class PostsController extends Controller
     }
 
     public function GetPostsFromSpecificUserWall() {
-        $requiredValues = ['username', 'specific_username'];
+        $requiredValues = ['specific_username'];
         $missingValues = $this->checkRequiredValues($requiredValues);
         if ($missingValues) {
             return $this->jsonErrorResponse($missingValues);
         }
-
-        $validUser = $this->users->getUserByUsername($_GET['username']);
-        if (empty($validUser))
-            $error['invalid_value'][] = "User";
 
         $specificValidUser = $this->users->getUserByUsername($_GET['specific_username']);
         if (empty($specificValidUser))
@@ -182,7 +161,7 @@ class PostsController extends Controller
         if (!empty($error['invalid_value']))
             return $this->jsonErrorResponse($error);
 
-        $posts = $this->posts->getPostsFromSpecificUserWall($validUser['id'], $specificValidUser['id']);
+        $posts = $this->posts->getPostsFromSpecificUserWall($this->jwtInfo['user_id'], $specificValidUser['id']);
         if (empty($posts))
             return $this->jsonSuccessResponse("No posts on users wall");
 
@@ -190,15 +169,11 @@ class PostsController extends Controller
     }
 
     public function GetPostsFromSpecificUser() {
-        $requiredValues = ['username', 'specific_username'];
+        $requiredValues = ['specific_username'];
         $missingValues = $this->checkRequiredValues($requiredValues);
         if ($missingValues) {
             return $this->jsonErrorResponse($missingValues);
         }
-
-        $validUser = $this->users->getUserByUsername($_GET['username']);
-        if (empty($validUser))
-            $error['invalid_value'][] = "User";
 
         $specificValidUser = $this->users->getUserByUsername($_GET['specific_username']);
         if (empty($specificValidUser))
@@ -207,7 +182,7 @@ class PostsController extends Controller
         if (!empty($error['invalid_value']))
             return $this->jsonErrorResponse($error);
 
-        $posts = $this->posts->getPostsFromSpecificUser($validUser['id'], $specificValidUser['id']);
+        $posts = $this->posts->getPostsFromSpecificUser($this->jwtInfo['user_id'], $specificValidUser['id']);
         if (empty($posts))
             return $this->jsonSuccessResponse("No posts from user");
 
@@ -215,20 +190,7 @@ class PostsController extends Controller
     }
 
     public function GetPostsFromUsersFollowedCategories() {
-        $requiredValues = ['username'];
-        $missingValues = $this->checkRequiredValues($requiredValues);
-        if ($missingValues) {
-            return $this->jsonErrorResponse($missingValues);
-        }
-
-        $validUser = $this->users->getUserByUsername($_GET['username']);
-        if (empty($validUser))
-            $error['invalid_value'][] = "User";
-
-        if (!empty($error['invalid_value']))
-            return $this->jsonErrorResponse($error);
-
-        $posts = $this->posts->getPostsFromGroupsWithFollowedCategory($validUser['id']);
+        $posts = $this->posts->getPostsFromGroupsWithFollowedCategory($this->jwtInfo['user_id']);
         if (empty($posts))
             return $this->jsonSuccessResponse("No posts from followed categories");
 
@@ -236,20 +198,7 @@ class PostsController extends Controller
     }
 
     public function GetPostsFromFollowedGroups() {
-        $requiredValues = ['username'];
-        $missingValues = $this->checkRequiredValues($requiredValues);
-        if ($missingValues) {
-            return $this->jsonErrorResponse($missingValues);
-        }
-
-        $validUser = $this->users->getUserByUsername($_GET['username']);
-        if (empty($validUser))
-            $error['invalid_value'][] = "User";
-
-        if (!empty($error['invalid_value']))
-            return $this->jsonErrorResponse($error);
-
-        $posts = $this->posts->getPostsFromFollowedGroups($validUser['id']);
+        $posts = $this->posts->getPostsFromFollowedGroups($this->jwtInfo['user_id']);
         if (empty($posts))
             return $this->jsonSuccessResponse("No posts from followed groups");
 
@@ -257,45 +206,19 @@ class PostsController extends Controller
     }
 
     public function GetPostsFromFollowedUsers() {
-        $requiredValues = ['username'];
-        $missingValues = $this->checkRequiredValues($requiredValues);
-        if ($missingValues) {
-            return $this->jsonErrorResponse($missingValues);
-        }
-
-        $validUser = $this->users->getUserByUsername($_GET['username']);
-        if (empty($validUser))
-            $error['invalid_value'][] = "User";
-
-        if (!empty($error['invalid_value']))
-            return $this->jsonErrorResponse($error);
-
-        $posts = $this->posts->getPostsFromFollowedUsersWall($validUser['id']);
+        $posts = $this->posts->getPostsFromFollowedUsersWall($this->jwtInfo['user_id']);
         if (empty($posts))
-            return $this->jsonSuccessResponse("No posts from followed users");
+            return $this->jsonSuccessResponse("No posts from followed users. $user_id");
 
         return $this->jsonSuccessResponse($posts); 
     }
 
     public function GetPostsFromFollowedGroupsAndUsers() {
-        $requiredValues = ['username'];
-        $missingValues = $this->checkRequiredValues($requiredValues);
-        if ($missingValues) {
-            return $this->jsonErrorResponse($missingValues);
-        }
-
-        $validUser = $this->users->getUserByUsername($_GET['username']);
-        if (empty($validUser))
-            $error['invalid_value'][] = "User";
-
-        if (!empty($error['invalid_value']))
-            return $this->jsonErrorResponse($error);
-
-        $posts['Users'] = $this->posts->getPostsFromFollowedUsersWall($validUser['id']);
+        $posts['Users'] = $this->posts->getPostsFromFollowedUsersWall($this->jwtInfo['user_id']);
         if (empty($posts['Users'][0]))
             $posts['Users'] = "No posts from followed users";
 
-        $posts['Groups'] = $this->posts->getPostsFromFollowedGroups($validUser['id']);
+        $posts['Groups'] = $this->posts->getPostsFromFollowedGroups($this->jwtInfo['user_id']);
         if (empty($posts['Groups'][0]))
             $posts['Groups'] = "No posts from followed groups";
 

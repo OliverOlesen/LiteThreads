@@ -160,15 +160,22 @@ class Posts extends DB {
             FROM
                 posts p
             INNER JOIN
-                followed_users fu ON p.user_id = fu.followed_user_id
-            INNER JOIN
-                users u ON u.id = fu.followed_user_id
+                users u ON u.id = p.user_id
             LEFT JOIN
                 VoteCounts vc ON p.id = vc.post_id
             LEFT JOIN
                 users_posts_votes upv ON p.id = upv.post_id AND upv.user_id = ?
             WHERE
-                fu.user_id = ? AND p.is_archived = false", [$user_id, $user_id]);
+                p.is_archived = false
+                AND p.group_id IS NULL
+                AND p.user_id IN (
+                    SELECT id
+                    FROM users u
+                    WHERE u.id IN (
+                        SELECT fu.followed_user_id
+                        FROM followed_users fu
+                        WHERE fu.user_id = ?
+                    ))", [$user_id, $user_id]);
 
         return $posts; 
     }
@@ -288,9 +295,7 @@ class Posts extends DB {
             FROM
                 posts p
             INNER JOIN
-                followed_users fu ON p.user_id = fu.followed_user_id
-            INNER JOIN
-                users u ON u.id = fu.followed_user_id
+                users u ON u.id = p.user_id
             LEFT JOIN
                 VoteCounts vc ON p.id = vc.post_id
             LEFT JOIN
@@ -326,9 +331,7 @@ class Posts extends DB {
                 FROM
                     posts p
                 INNER JOIN
-                    followed_users fu ON p.user_id = fu.followed_user_id
-                INNER JOIN
-                    users u ON u.id = fu.followed_user_id
+                    users u ON u.id = p.user_id
                 LEFT JOIN
                     `groups` g ON g.id = p.group_id
                 LEFT JOIN
