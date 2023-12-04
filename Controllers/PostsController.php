@@ -208,7 +208,7 @@ class PostsController extends Controller
     public function GetPostsFromFollowedUsers() {
         $posts = $this->posts->getPostsFromFollowedUsersWall($this->jwtInfo['user_id']);
         if (empty($posts))
-            return $this->jsonSuccessResponse("No posts from followed users. $user_id");
+            return $this->jsonSuccessResponse("No posts from followed users");
 
         return $this->jsonSuccessResponse($posts); 
     }
