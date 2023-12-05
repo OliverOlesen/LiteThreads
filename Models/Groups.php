@@ -70,10 +70,12 @@ class Groups extends DB {
 
     public function getUsersModeratedGroups($user_id) {
         $moderatedGroups = DB::selectAll(
-            "SELECT g.name group_name 
+            "SELECT g.name group_name, c.name category_name, g.creation_date
             FROM group_moderators gm
             INNER JOIN `groups` g
             ON g.id = gm.group_id
+            INNER JOIN categories c
+            ON c.id = g.category_id
             WHERE gm.user_id = ?", [$user_id]);
 
         return $moderatedGroups;
@@ -122,22 +124,23 @@ class Groups extends DB {
             g.name AS group_name,
             c.name AS category_name,
             g.creation_date
-        FROM
+         FROM
             `groups` AS g
-        INNER JOIN
+         INNER JOIN
             users_followed_categories AS ufc ON ufc.category_id = g.category_id AND ufc.user_id = ?
-        LEFT JOIN
+         LEFT JOIN
             categories AS c ON c.id = ufc.category_id
-        LEFT JOIN
+         LEFT JOIN
             user_blocked_groups AS ubg ON ubg.group_id = g.id AND ubg.user_id = ufc.user_id
-        WHERE
+         WHERE
             g.is_archived = FALSE
             AND ubg.user_id IS NULL
             AND NOT EXISTS (
-                SELECT *
+                SELECT 1
                 FROM followed_groups AS fg
-                WHERE fg.user_id = ? AND fg.group_id = g.id
-            );", [$user_id, $user_id]);
+                WHERE fg.user_id = ufc.user_id AND fg.group_id = g.id
+            )
+            AND g.id NOT IN (SELECT group_id FROM followed_groups WHERE user_id = ufc.user_id)", [$user_id]);
 
         return $groups;
     }

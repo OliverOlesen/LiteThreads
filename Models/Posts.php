@@ -390,7 +390,9 @@ class Posts extends DB {
                         SELECT category_id
                         FROM users_followed_categories ufc
                         WHERE ufc.user_id = ?
-                    ))",[$user_id, $user_id]);
+                    )
+                )
+                AND p.group_id NOT IN (SELECT group_id FROM followed_groups WHERE user_id = ?)",[$user_id, $user_id, $user_id]);
 
         return $posts; 
     }
