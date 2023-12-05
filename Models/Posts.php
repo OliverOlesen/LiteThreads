@@ -382,6 +382,7 @@ class Posts extends DB {
                 users_posts_votes upv ON p.id = upv.post_id AND upv.user_id = ?
             WHERE
                 p.is_archived = false
+                AND p.user_id != ?
                 AND p.group_id IS NOT NULL
                 AND p.group_id IN (
                     SELECT id
@@ -392,7 +393,8 @@ class Posts extends DB {
                         WHERE ufc.user_id = ?
                     )
                 )
-                AND p.group_id NOT IN (SELECT group_id FROM followed_groups WHERE user_id = ?)",[$user_id, $user_id, $user_id]);
+                AND p.group_id NOT IN (SELECT group_id FROM followed_groups WHERE user_id = ?)
+                AND p.group_id NOT IN (SELECT group_id FROM group_moderators WHERE user_id = ?)",[$user_id, $user_id, $user_id, $user_id]);
 
         return $posts; 
     }
