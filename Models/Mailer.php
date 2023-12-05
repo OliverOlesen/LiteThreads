@@ -17,15 +17,15 @@ class Mailer extends DB {
         //Server settings
         $mail->SMTPDebug = 0;                                       //Enable verbose debug output
         $mail->isSMTP();                                            //Send using SMTP
-        $mail->Host       = 'in-v3.mailjet.com';                    //Set the SMTP server to send through
-        $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
+        $mail->Host       = '185.22.74.33';                    //Set the SMTP server to send through
+        //$mail->SMTPAuth   = true;                                   //Enable SMTP authentication
         $mail->SMTPSecure ='TLS';                                   //Enable implicit TLS encryption
-        $mail->Username   = $_ENV["MAILJET_UNAME"];                 //SMTP username
-        $mail->Password   = $_ENV["MAILJET_PWRD"];                  //SMTP password
+        //$mail->Username   = $_ENV["MAILJET_UNAME"];                 //SMTP username
+        //$mail->Password   = $_ENV["MAILJET_PWRD"];                  //SMTP password
         $mail->Port       = 25;                                     //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
     
         //Recipients
-        $mail->setFrom('oiol.skp@edu.mercantec.dk', 'Oliver Olesen');
+        $mail->setFrom('xyz@mercantec.dk', 'Oliver Olesen');
         return $mail;
     }
 
