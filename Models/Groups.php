@@ -140,7 +140,8 @@ class Groups extends DB {
                 FROM followed_groups AS fg
                 WHERE fg.user_id = ufc.user_id AND fg.group_id = g.id
             )
-            AND g.id NOT IN (SELECT group_id FROM followed_groups WHERE user_id = ufc.user_id)", [$user_id]);
+            AND g.id NOT IN (SELECT group_id FROM followed_groups WHERE user_id = ?)
+            AND g.id NOT IN (SELECT group_id FROM group_moderators WHERE user_id = ?)", [$user_id, $user_id, $user_id]);
 
         return $groups;
     }
