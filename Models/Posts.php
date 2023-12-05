@@ -394,7 +394,7 @@ class Posts extends DB {
                     )
                 )
                 AND p.group_id NOT IN (SELECT group_id FROM followed_groups WHERE user_id = ?)
-                AND p.group_id NOT IN (SELECT group_id FROM group_moderators WHERE user_id = ?)",[$user_id, $user_id, $user_id, $user_id]);
+                AND p.group_id NOT IN (SELECT group_id FROM group_moderators WHERE user_id = ?)",[$user_id, $user_id, $user_id, $user_id, $user_id]);
 
         return $posts; 
     }
