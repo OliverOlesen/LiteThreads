@@ -47,26 +47,10 @@ class _CreateUserViewState extends State<CreateUserView> {
         if (emailController.text != "" &&
             usernameController.text != "" &&
             passwordController.text != "") {
-          var jsonBody = {
-            "username": usernameController.text,
-            "password": passwordController.text,
-            "email": emailController.text,
-            "birthdate":
-                "${pickerData.year}-${pickerData.month}-${pickerData.day}"
-          };
-
-          fetch("/", jsonBody).then((value) {
-            if (value.status != "ok") {
-              setState(() {
-                for (var i = 0; i < value.missingFields.length; i++) {
-                  if (value.missingFields[i].contains("email")) {
-                    showErrorsEmail = true;
-                  } else if (value.missingFields[i].contains("username")) {
-                    showErrorsUsername = true;
-                  }
-                }
-              });
-            } else {
+          fetch("get_user_availability?email=${emailController.text}&username=${usernameController.text}")
+              .then((value) {
+            if (value.status == "ok") {
+              fetch("create_mail_verf?email=${emailController.text}");
               Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -74,7 +58,20 @@ class _CreateUserViewState extends State<CreateUserView> {
                           emailController.text,
                           usernameController.text,
                           passwordController.text,
-                          pickerData.toString())));
+                          "${pickerData.year}-${pickerData.month}-${pickerData.day}")));
+            } else {
+              if (value.response['existing_values'].length == 1) {
+                if (value.response['existing_values'][0] == "Email") {
+                  showErrorsEmail = true;
+                  showErrorsUsername = false;
+                } else {
+                  showErrorsEmail = false;
+                  showErrorsUsername = true;
+                }
+              } else if (value.response['existing_values'].length == 2) {
+                showErrorsEmail = true;
+                showErrorsUsername = true;
+              }
             }
           });
         }

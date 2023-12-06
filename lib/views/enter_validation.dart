@@ -21,33 +21,21 @@ class TwoFactorCreate extends StatefulWidget {
 }
 
 class _TwoFactorCreateState extends State<TwoFactorCreate> {
-  TextEditingController validationCode = TextEditingController();
   TextEditingController twoFactorCode = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     void submitCode() {
       if (twoFactorCode.text != "") {
-        print("HEJ");
         // TODO Make post-request
-        var jsonBody = {
-          "username": widget.username,
-          "password": widget.password,
-          "birthdate": widget.birthdate.toString(),
-          "verif_code": twoFactorCode.text
-        };
-        fetch("/", jsonBody).then((value) {
+
+        fetch("verf_mail_code?email=${widget.email}&verf_code=${twoFactorCode.text}")
+            .then((value) {
           if (value.status == "ok") {
+            fetch(
+                "create_user?username=${widget.username}&password=${widget.password}&email=${widget.email}&birthdate=${widget.birthdate}");
             Navigator.pop(context);
             Navigator.pop(context);
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => PageNavigation(
-                        username: widget.username,
-                        email: widget.email,
-                        password: widget.password,
-                        birthdate: widget.birthdate)));
           }
         });
       }

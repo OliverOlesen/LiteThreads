@@ -1,41 +1,39 @@
-class Post {
-  final String title;
-  final String content;
-  final DateTime createdDate;
-  final String author;
-  final int? groupID;
-  final int likes;
-  final int dislikes;
+// ignore_for_file: non_constant_identifier_names
 
-  Post(
-      {required this.title,
-      required this.content,
-      required this.createdDate,
-      required this.author,
-      this.groupID,
-      required this.likes,
-      required this.dislikes});
+class Post {
+  late String id;
+  late String username;
+  late String group_name;
+  late String title;
+  late String content;
+  late DateTime creationDate;
+  late int likes;
+  late int dislikes;
+  late int? userVote;
+
+  Post({
+    required this.id,
+    required this.username,
+    required this.group_name,
+    required this.title,
+    required this.content,
+    required this.creationDate,
+    required this.likes,
+    required this.dislikes,
+    required this.userVote,
+  });
 
   factory Post.fromJson(Map<String, dynamic> json) {
-    return switch (json) {
-      {
-        "title": String title,
-        "content": String content,
-        "createdDate": DateTime createdDate,
-        "author": String author,
-        "group_id": int groupId,
-        "likes": int likes,
-        "dislikes": int dislikes
-      } =>
-        Post(
-            title: title,
-            content: content,
-            createdDate: createdDate,
-            author: author,
-            groupID: groupId,
-            likes: likes,
-            dislikes: dislikes),
-      _ => throw const FormatException('Failed to load Post.'),
-    };
+    return Post(
+      id: json['id'].toString(),
+      username: json['username'],
+      group_name: json['group_name'] ?? "",
+      title: json['title'],
+      content: json['content'],
+      creationDate: DateTime.parse(json['creation_date']),
+      likes: int.parse(json['likes']),
+      dislikes: int.parse(json['dislikes']),
+      userVote: json['user_vote'] != null ? int.parse(json['user_vote']) : null,
+    );
   }
 }

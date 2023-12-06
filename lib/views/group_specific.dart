@@ -1,47 +1,77 @@
 import 'package:flutter/material.dart';
 import 'package:litethreads/components/fetch.dart';
 import 'package:litethreads/components/post_card.dart';
+import 'package:litethreads/globals/stylesheet.dart';
 import 'package:litethreads/globals/variables.dart';
 import 'package:litethreads/models/post.dart';
-import 'package:litethreads/views/group_specific.dart';
 import 'package:litethreads/views/user_specifik.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class GroupSpecificView extends StatefulWidget {
+  final String? groupName;
+  final bool following;
+  final bool mod;
+  const GroupSpecificView(
+      {super.key,
+      required this.groupName,
+      required this.following,
+      required this.mod});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<GroupSpecificView> createState() => _GroupSpecificViewState();
 }
 
-class _HomePageState extends State<HomePage> {
-  late Future<List<Post>> wall;
+class _GroupSpecificViewState extends State<GroupSpecificView> {
+  late Future<List<Post>> wallContent;
+  late Widget content;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    wall = getPosts("get_user_followed_users_and_groups_posts");
+    wallContent = getSpecificPosts(
+        "get_group_posts?username=$global_username&group_name=${widget.groupName}");
   }
 
   Future<void> _refresh() async {
     // Add any necessary logic to refresh the data
     setState(() {
-      wall = getPosts("get_user_followed_users_and_groups_posts");
+      wallContent = getSpecificPosts(
+          "get_group_posts?username=$global_username&group_name=${widget.groupName}");
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: _refresh,
-      child: FutureBuilder(
-        future: wall,
+    return Scaffold(
+      backgroundColor: backgroundcolor,
+      appBar: AppBar(
+        iconTheme: IconThemeData(color: appBarTextColors),
+        backgroundColor: appBarBackgroundColor,
+        title:
+            Text(widget.groupName!, style: TextStyle(color: appBarTextColors)),
+        actions: [
+          TextButton(
+              onPressed: () {
+                widget.following == false
+                    ? postInteraction(
+                        "follow_group?group_name=${widget.groupName}")
+                    : postInteraction(
+                        "unfollow_group?group_name=${widget.groupName}");
+                setState(() {});
+              },
+              child: Text(
+                widget.following == false ? "Follow" : "Unfollow",
+                style: TextStyle(color: appBarTextColors),
+              )),
+        ],
+      ),
+      body: FutureBuilder(
+        future: wallContent,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasData) {
-              // Add a return statement here
-              if (snapshot.data!.isNotEmpty) {
-                return ListView.builder(
+            if (snapshot.data!.isNotEmpty) {
+              content = RefreshIndicator(
+                onRefresh: _refresh,
+                child: ListView.builder(
                   itemCount: snapshot.data!.length,
                   itemBuilder: (context, index) {
                     DateTime now = DateTime.now();
@@ -151,8 +181,8 @@ class _HomePageState extends State<HomePage> {
                                             "vote_on_post?username=$global_username&post_id=${snapshot.data![index].id}&reaction_like=1")
                                         .then((value) {
                                       setState(() {
-                                        wall = getPosts(
-                                            "get_user_followed_users_and_groups_posts");
+                                        wallContent = getSpecificPosts(
+                                            "get_group_posts?username=$global_username&group_name=${widget.groupName}");
                                       });
                                     });
                                   },
@@ -169,8 +199,8 @@ class _HomePageState extends State<HomePage> {
                                             "vote_on_post?username=$global_username&post_id=${snapshot.data![index].id}&reaction_like=0")
                                         .then((value) {
                                       setState(() {
-                                        wall = getPosts(
-                                            "get_user_followed_users_and_groups_posts");
+                                        wallContent = getSpecificPosts(
+                                            "get_group_posts?username=$global_username&group_name=${widget.groupName}");
                                       });
                                     });
                                   },
@@ -187,24 +217,20 @@ class _HomePageState extends State<HomePage> {
                       ),
                     );
                   },
-                );
-              } else {
-                return const Center(
-                  child: Text("No Posts"),
-                );
-              }
-            } else {
-              return const Center(
-                child: Text("No Posts"),
+                ),
               );
+            } else {
+              content = const Center(child: Text("No Posts Found"));
             }
+            return content;
           } else if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            content = const Center(child: CircularProgressIndicator());
           } else {
-            return const Center(
-              child: Text("Something went wrong"),
-            );
+            content = const Center(
+                child: Text(
+                    "We encountered some issues displaying posts.\nPlease try again later"));
           }
+          return content;
         },
       ),
     );

@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:litethreads/components/fetch.dart';
 import 'package:litethreads/components/group_card.dart';
+import 'package:litethreads/globals/stylesheet.dart';
 import 'package:litethreads/models/group.dart';
+import 'package:litethreads/views/group_specific.dart';
 
 class PreferenceDiscoverPage extends StatefulWidget {
-  final Future<List<Group>> groupsIFollow;
-  final Future<List<Group>> groupsToDiscover;
-
-  const PreferenceDiscoverPage({
-    Key? key,
-    required this.groupsIFollow,
-    required this.groupsToDiscover,
-  }) : super(key: key);
+  const PreferenceDiscoverPage({Key? key}) : super(key: key);
 
   @override
   State<PreferenceDiscoverPage> createState() => _PreferenceDiscoverPageState();
@@ -23,8 +19,8 @@ class _PreferenceDiscoverPageState extends State<PreferenceDiscoverPage> {
   @override
   void initState() {
     super.initState();
-    _followingGroups = widget.groupsIFollow;
-    _discoverGroups = widget.groupsToDiscover;
+    _followingGroups = getGroups("get_users_followed_and_moderated_groups");
+    _discoverGroups = getGroups("get_users_followed_category_groups");
   }
 
   @override
@@ -32,8 +28,14 @@ class _PreferenceDiscoverPageState extends State<PreferenceDiscoverPage> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        bottomSheet: const TabBar(
-          tabs: [Icon(Icons.favorite), Icon(Icons.explore)],
+        backgroundColor: backgroundcolor,
+        appBar: const TabBar(
+          labelColor: Colors.lightBlue,
+          indicatorColor: Colors.lightBlue,
+          tabs: [
+            Icon(Icons.favorite_border_outlined),
+            Icon(Icons.explore_outlined)
+          ],
         ),
         body: TabBarView(
           children: [
@@ -45,24 +47,48 @@ class _PreferenceDiscoverPageState extends State<PreferenceDiscoverPage> {
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (snapshot.hasData) {
-                  return SingleChildScrollView(
-                    child: Column(children: [
-                      const Padding(
-                        padding: EdgeInsets.only(top: 8.0),
-                        child: Text("Groups you follow",
-                            style: TextStyle(fontSize: 22),
-                            textAlign: TextAlign.center),
-                      ),
-                      ...List.generate(
-                        snapshot.data!.length,
-                        (index) => groupCard(
-                          index,
-                          "",
-                          snapshot.data![index].name,
-                          "follow",
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      setState(() {
+                        _followingGroups = getGroups(
+                            "get_users_followed_and_moderated_groups");
+                        _discoverGroups =
+                            getGroups("get_users_followed_category_groups");
+                      });
+                    },
+                    child: SingleChildScrollView(
+                      child: Column(children: [
+                        const Padding(
+                          padding: EdgeInsets.only(top: 8.0),
+                          child: Center(
+                            child: Text("Groups you follow",
+                                style: TextStyle(fontSize: 22),
+                                textAlign: TextAlign.center),
+                          ),
                         ),
-                      ),
-                    ]),
+                        ...List.generate(
+                          snapshot.data!.length,
+                          (index) => InkWell(
+                            onTap: () {
+                              Navigator.push(context, MaterialPageRoute(
+                                builder: (context) {
+                                  return GroupSpecificView(
+                                    groupName: snapshot.data![index].name,
+                                    following: true,
+                                    mod: snapshot.data![index].moderator,
+                                  );
+                                },
+                              ));
+                            },
+                            child: groupCard(
+                                index,
+                                snapshot.data![index].categoryName ?? "",
+                                snapshot.data![index].name,
+                                "follow"),
+                          ),
+                        ),
+                      ]),
+                    ),
                   );
                 } else {
                   return Container(); // Handle other cases if needed
@@ -76,27 +102,49 @@ class _PreferenceDiscoverPageState extends State<PreferenceDiscoverPage> {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (snapshot.hasData) {
-                  return SingleChildScrollView(
-                    child: Column(children: [
-                      const Padding(
-                        padding: EdgeInsets.only(top: 8.0),
-                        child: Text(
-                          "Discover new groups from your preference",
-                          style: TextStyle(fontSize: 20),
-                          textAlign: TextAlign.center,
+                } else if (snapshot.connectionState == ConnectionState.done) {
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      setState(() {
+                        _followingGroups = getGroups(
+                            "get_users_followed_and_moderated_groups");
+                        _discoverGroups =
+                            getGroups("get_users_followed_category_groups");
+                      });
+                    },
+                    child: SingleChildScrollView(
+                      child: Column(children: [
+                        const Padding(
+                          padding: EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            "Discover new groups from your preference",
+                            style: TextStyle(fontSize: 20),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
-                      ),
-                      ...List.generate(
-                        snapshot.data!.length,
-                        (index) => groupCard(
-                          index,
-                          "",
-                          snapshot.data![index].name,
-                          "unfollow",
+                        ...List.generate(
+                          snapshot.data!.length,
+                          (index) => InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => GroupSpecificView(
+                                          groupName: snapshot.data![index].name,
+                                          following: false,
+                                          mod: snapshot.data![index].moderator,
+                                        )),
+                              );
+                            },
+                            child: groupCard(
+                                index,
+                                snapshot.data![index].categoryName ?? "",
+                                snapshot.data![index].name,
+                                "unfollow"),
+                          ),
                         ),
-                      ),
-                    ]),
+                      ]),
+                    ),
                   );
                 } else {
                   return Container(); // Handle other cases if needed

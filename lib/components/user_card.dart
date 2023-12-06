@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-Card groupCard(int i, String category, String title, String follow) {
+Card userCard(int i, String title, String follow) {
   return Card(
-    // You can customize the appearance of the card using the properties below
     color: Colors.white,
+    // You can customize the appearance of the card using the properties below
     elevation: 2.0,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(7.0),
@@ -15,24 +15,31 @@ Card groupCard(int i, String category, String title, String follow) {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          category != ""
-              ? Text(
-                  category,
-                  style: const TextStyle(
-                    fontSize: 16.0,
-                  ),
-                )
-              : Container(),
           const SizedBox(height: 3.0),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                children: [
+                  Container(
+                      margin: const EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(7),
+                      decoration: const BoxDecoration(
+                          color: Colors.blueAccent,
+                          borderRadius: BorderRadius.all(Radius.circular(25))),
+                      child: const Icon(
+                        Icons.person,
+                        size: 40,
+                        color: Colors.white,
+                      )),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
               if (follow == "follow")
                 Container(

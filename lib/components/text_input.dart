@@ -8,7 +8,7 @@ Container textInputField(TextEditingController tec, String hint) {
         decoration: InputDecoration(hintText: "Enter $hint"),
         keyboardType: hint.toLowerCase().contains("email")
             ? TextInputType.emailAddress
-            : TextInputType.name,
+            : TextInputType.visiblePassword,
         validator: (value) {
           if (hint.toLowerCase().contains("email")) {
             // Use a regular expression to check if the value is a valid email

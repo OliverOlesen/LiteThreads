@@ -1,12 +1,10 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:litethreads/components/custom_spacer.dart';
 import 'package:litethreads/components/elevated_button.dart';
 import 'package:litethreads/components/fetch.dart';
+import 'package:litethreads/components/snackbar_error.dart';
 import 'package:litethreads/components/text_input.dart';
-import 'package:litethreads/models/post.dart';
-import 'package:litethreads/models/user.dart';
+import 'package:litethreads/globals/variables.dart';
 import 'package:litethreads/views/create_user.dart';
 import 'package:litethreads/views/navigation.dart';
 
@@ -26,25 +24,22 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     void loginPressed() {
       if (_key.currentState!.validate()) {
-        dynamic jsonBody = {
-          "email": emailController.text,
-          "password": passController.text
-        };
-
         // Login Fetch
-        fetch("/login_user", jsonBody).then((value) {
-          // If successful login then make fetch for followed posts for users and groups
+        emailController.text = emailController.text.trim();
+        passController.text = passController.text.trim();
 
-          // Then login
-          User u = User.fromJson(value);
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => PageNavigation(
-                      username: u.username,
-                      email: u.email,
-                      password: u.password,
-                      birthdate: u.birthdate)));
+        fetch("login_user?email=${emailController.text}&password=${passController.text}")
+            .then((value) {
+          if (value.status != "ok") {
+            snackbarError("Internal server error. Please try again", context);
+          } else {
+            // Then login
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => PageNavigation(
+                        username: global_username, email: global_email)));
+          }
         });
       }
     }

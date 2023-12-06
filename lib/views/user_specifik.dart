@@ -1,32 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:litethreads/components/fetch.dart';
 import 'package:litethreads/components/post_card.dart';
+import 'package:litethreads/globals/stylesheet.dart';
 import 'package:litethreads/globals/variables.dart';
 import 'package:litethreads/models/post.dart';
+import 'package:litethreads/models/user.dart';
 import 'package:litethreads/views/group_specific.dart';
-import 'package:litethreads/views/user_specifik.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class UserSpecificView extends StatefulWidget {
+  final String user;
+  const UserSpecificView({super.key, required this.user});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<UserSpecificView> createState() => _UserSpecificViewState();
 }
 
-class _HomePageState extends State<HomePage> {
-  late Future<List<Post>> wall;
+class _UserSpecificViewState extends State<UserSpecificView> {
+  late Future<List<Post>> wallContent;
+  late Future<List<User>> followedUsers;
+  late Widget content;
+
+  late Widget follows;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    wall = getPosts("get_user_followed_users_and_groups_posts");
+    wallContent = getSpecificPosts(
+        "get_users_wall_post?specific_username=${widget.user}");
+
+    followedUsers = getFollowedUsers("get_followed_users");
   }
 
   Future<void> _refresh() async {
     // Add any necessary logic to refresh the data
     setState(() {
-      wall = getPosts("get_user_followed_users_and_groups_posts");
+      wallContent = getSpecificPosts(
+          "get_users_wall_post?specific_username=${widget.user}");
     });
   }
 
@@ -34,14 +43,66 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: _refresh,
-      child: FutureBuilder(
-        future: wall,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasData) {
-              // Add a return statement here
+      child: Scaffold(
+        backgroundColor: backgroundcolor,
+        appBar: AppBar(
+          iconTheme: IconThemeData(color: appBarTextColors),
+          backgroundColor: appBarBackgroundColor,
+          title: Text(widget.user, style: TextStyle(color: appBarTextColors)),
+          actions: [
+            FutureBuilder(
+              future: followedUsers,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  for (var i = 0; i < snapshot.data!.length; i++) {
+                    if (snapshot.data![i].username.contains(widget.user)) {
+                      follows = TextButton(
+                          onPressed: () {
+                            postInteraction(
+                                "follow_unfollow_user?follow_username=${widget.user}");
+                            setState(() {
+                              followedUsers =
+                                  getFollowedUsers("get_followed_users");
+                            });
+                          },
+                          child: Text(
+                            "Unfollow",
+                            style: TextStyle(color: appBarTextColors),
+                          ));
+                      break;
+                    } else {
+                      follows = TextButton(
+                          onPressed: () {
+                            postInteraction(
+                                "follow_unfollow_user?follow_username=${widget.user}");
+                            setState(() {
+                              followedUsers =
+                                  getFollowedUsers("get_followed_users");
+                            });
+                          },
+                          child: Text(
+                            "Follow",
+                            style: TextStyle(color: appBarTextColors),
+                          ));
+                    }
+                  }
+                } else if (snapshot.connectionState ==
+                    ConnectionState.waiting) {
+                  follows = const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                return follows;
+              },
+            ),
+          ],
+        ),
+        body: FutureBuilder(
+          future: wallContent,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
               if (snapshot.data!.isNotEmpty) {
-                return ListView.builder(
+                content = ListView.builder(
                   itemCount: snapshot.data!.length,
                   itemBuilder: (context, index) {
                     DateTime now = DateTime.now();
@@ -151,8 +212,8 @@ class _HomePageState extends State<HomePage> {
                                             "vote_on_post?username=$global_username&post_id=${snapshot.data![index].id}&reaction_like=1")
                                         .then((value) {
                                       setState(() {
-                                        wall = getPosts(
-                                            "get_user_followed_users_and_groups_posts");
+                                        wallContent = getSpecificPosts(
+                                            "get_users_wall_post?specific_username=${widget.user}");
                                       });
                                     });
                                   },
@@ -169,8 +230,8 @@ class _HomePageState extends State<HomePage> {
                                             "vote_on_post?username=$global_username&post_id=${snapshot.data![index].id}&reaction_like=0")
                                         .then((value) {
                                       setState(() {
-                                        wall = getPosts(
-                                            "get_user_followed_users_and_groups_posts");
+                                        wallContent = getSpecificPosts(
+                                            "get_users_wall_post?specific_username=${widget.user}");
                                       });
                                     });
                                   },
@@ -189,23 +250,19 @@ class _HomePageState extends State<HomePage> {
                   },
                 );
               } else {
-                return const Center(
-                  child: Text("No Posts"),
-                );
+                content = const Center(child: Text("No Posts Found"));
               }
+              return content;
+            } else if (snapshot.connectionState == ConnectionState.waiting) {
+              content = const Center(child: CircularProgressIndicator());
             } else {
-              return const Center(
-                child: Text("No Posts"),
-              );
+              content = const Center(
+                  child: Text(
+                      "We encountered some issues displaying posts.\nPlease try again later"));
             }
-          } else if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else {
-            return const Center(
-              child: Text("Something went wrong"),
-            );
-          }
-        },
+            return content;
+          },
+        ),
       ),
     );
   }
