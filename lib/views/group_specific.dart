@@ -10,11 +10,7 @@ class GroupSpecificView extends StatefulWidget {
   final String? groupName;
   final bool following;
   final bool mod;
-  const GroupSpecificView(
-      {super.key,
-      required this.groupName,
-      required this.following,
-      required this.mod});
+  const GroupSpecificView({super.key, required this.groupName, required this.following, required this.mod});
 
   @override
   State<GroupSpecificView> createState() => _GroupSpecificViewState();
@@ -27,15 +23,13 @@ class _GroupSpecificViewState extends State<GroupSpecificView> {
   @override
   void initState() {
     super.initState();
-    wallContent = getSpecificPosts(
-        "get_group_posts?username=$global_username&group_name=${widget.groupName}");
+    wallContent = getSpecificPosts("get_group_posts?username=$global_username&group_name=${widget.groupName}");
   }
 
   Future<void> _refresh() async {
     // Add any necessary logic to refresh the data
     setState(() {
-      wallContent = getSpecificPosts(
-          "get_group_posts?username=$global_username&group_name=${widget.groupName}");
+      wallContent = getSpecificPosts("get_group_posts?username=$global_username&group_name=${widget.groupName}");
     });
   }
 
@@ -46,17 +40,15 @@ class _GroupSpecificViewState extends State<GroupSpecificView> {
       appBar: AppBar(
         iconTheme: IconThemeData(color: appBarTextColors),
         backgroundColor: appBarBackgroundColor,
-        title:
-            Text(widget.groupName!, style: TextStyle(color: appBarTextColors)),
+        title: widget.mod == false ? Text(widget.groupName!, style: TextStyle(color: appBarTextColors)) : Text("${widget.groupName!} (Mod)", style: TextStyle(color: appBarTextColors)),
         actions: [
           TextButton(
               onPressed: () {
-                widget.following == false
-                    ? postInteraction(
-                        "follow_group?group_name=${widget.groupName}")
-                    : postInteraction(
-                        "unfollow_group?group_name=${widget.groupName}");
-                setState(() {});
+                if (widget.following == true) {
+                  postInteraction("unfollow_group?group_name=${widget.groupName}").then((value) => Navigator.pop(context));
+                } else {
+                  postInteraction("follow_group?group_name=${widget.groupName}");
+                }
               },
               child: Text(
                 widget.following == false ? "Follow" : "Unfollow",
@@ -79,8 +71,7 @@ class _GroupSpecificViewState extends State<GroupSpecificView> {
 
                     Duration diff = now.difference(when);
                     return Container(
-                      padding:
-                          const EdgeInsets.only(top: 10, left: 20, right: 20),
+                      padding: const EdgeInsets.only(top: 10, left: 20, right: 20),
                       margin: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
@@ -90,8 +81,7 @@ class _GroupSpecificViewState extends State<GroupSpecificView> {
                             color: Colors.grey.withOpacity(0.3),
                             spreadRadius: 1.0,
                             blurRadius: 1.0,
-                            offset: const Offset(
-                                0, 5.0), // changes the shadow position
+                            offset: const Offset(0, 5.0), // changes the shadow position
                           ),
                         ],
                       ),
@@ -106,44 +96,33 @@ class _GroupSpecificViewState extends State<GroupSpecificView> {
                                     Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) =>
-                                                GroupSpecificView(
-                                                  groupName: snapshot
-                                                      .data![index].group_name,
+                                            builder: (context) => GroupSpecificView(
+                                                  groupName: snapshot.data![index].group_name,
                                                   following: true,
                                                   mod: false,
                                                 )));
                                   },
-                                  child: snapshot.data![index].group_name != ""
-                                      ? Text(
-                                          "/${snapshot.data![index].group_name}")
-                                      : Container()),
-                              if (snapshot.data![index].username ==
-                                  global_username)
+                                  child: snapshot.data![index].group_name != "" ? Text("/${snapshot.data![index].group_name}") : Container()),
+                              if (snapshot.data![index].username == global_username)
                                 InkWell(
                                     onTap: () {
                                       showDialog(
                                           context: context,
                                           builder: (context) => AlertDialog(
-                                                title:
-                                                    const Text("Delete Post?"),
-                                                content: const Text(
-                                                    "You are about to delete this post. \nYou can't undo this action.\nAre you sure?"),
+                                                title: const Text("Delete Post?"),
+                                                content: const Text("You are about to delete this post. \nYou can't undo this action.\nAre you sure?"),
                                                 actions: [
                                                   TextButton(
                                                       onPressed: () {
-                                                        postInteraction(
-                                                            "archive_post?post_id=${snapshot.data![index].id}");
+                                                        postInteraction("archive_post?post_id=${snapshot.data![index].id}");
                                                         Navigator.pop(context);
                                                       },
-                                                      child:
-                                                          const Text("Delete")),
+                                                      child: const Text("Delete")),
                                                   TextButton(
                                                       onPressed: () {
                                                         Navigator.pop(context);
                                                       },
-                                                      child:
-                                                          const Text("Cancel"))
+                                                      child: const Text("Cancel"))
                                                 ],
                                               ));
                                     },
@@ -154,20 +133,13 @@ class _GroupSpecificViewState extends State<GroupSpecificView> {
                             children: [
                               InkWell(
                                   onTap: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                UserSpecificView(
-                                                    user: snapshot.data![index]
-                                                        .username)));
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => UserSpecificView(user: snapshot.data![index].username)));
                                   },
                                   child: Text(snapshot.data![index].username)),
                               Text(" - ${formatDuration(diff)}"),
                             ],
                           ),
-                          Text(snapshot.data![index].title,
-                              style: const TextStyle(fontSize: 24)),
+                          Text(snapshot.data![index].title, style: const TextStyle(fontSize: 24)),
                           Text(
                             snapshot.data![index].content,
                             style: const TextStyle(fontSize: 16),
@@ -177,38 +149,28 @@ class _GroupSpecificViewState extends State<GroupSpecificView> {
                             children: [
                               IconButton(
                                   onPressed: () {
-                                    postInteraction(
-                                            "vote_on_post?username=$global_username&post_id=${snapshot.data![index].id}&reaction_like=1")
-                                        .then((value) {
+                                    postInteraction("vote_on_post?username=$global_username&post_id=${snapshot.data![index].id}&reaction_like=1").then((value) {
                                       setState(() {
-                                        wallContent = getSpecificPosts(
-                                            "get_group_posts?username=$global_username&group_name=${widget.groupName}");
+                                        wallContent = getSpecificPosts("get_group_posts?username=$global_username&group_name=${widget.groupName}");
                                       });
                                     });
                                   },
                                   icon: Icon(
                                     Icons.thumb_up,
-                                    color: snapshot.data![index].userVote == 1
-                                        ? Colors.lightBlue
-                                        : Colors.grey,
+                                    color: snapshot.data![index].userVote == 1 ? Colors.lightBlue : Colors.grey,
                                   )),
                               Text("${snapshot.data![index].likes}"),
                               IconButton(
                                   onPressed: () {
-                                    postInteraction(
-                                            "vote_on_post?username=$global_username&post_id=${snapshot.data![index].id}&reaction_like=0")
-                                        .then((value) {
+                                    postInteraction("vote_on_post?username=$global_username&post_id=${snapshot.data![index].id}&reaction_like=0").then((value) {
                                       setState(() {
-                                        wallContent = getSpecificPosts(
-                                            "get_group_posts?username=$global_username&group_name=${widget.groupName}");
+                                        wallContent = getSpecificPosts("get_group_posts?username=$global_username&group_name=${widget.groupName}");
                                       });
                                     });
                                   },
                                   icon: Icon(
                                     Icons.thumb_down,
-                                    color: snapshot.data![index].userVote == 0
-                                        ? Colors.lightBlue
-                                        : Colors.grey,
+                                    color: snapshot.data![index].userVote == 0 ? Colors.lightBlue : Colors.grey,
                                   )),
                               Text("${snapshot.data![index].dislikes}")
                             ],
@@ -226,9 +188,7 @@ class _GroupSpecificViewState extends State<GroupSpecificView> {
           } else if (snapshot.connectionState == ConnectionState.waiting) {
             content = const Center(child: CircularProgressIndicator());
           } else {
-            content = const Center(
-                child: Text(
-                    "We encountered some issues displaying posts.\nPlease try again later"));
+            content = const Center(child: Text("We encountered some issues displaying posts.\nPlease try again later"));
           }
           return content;
         },

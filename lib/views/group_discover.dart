@@ -48,8 +48,7 @@ class _GroupDiscoverPageState extends State<GroupDiscoverPage> {
 
                     Duration diff = now.difference(when);
                     return Container(
-                      padding:
-                          const EdgeInsets.only(top: 10, left: 20, right: 20),
+                      padding: const EdgeInsets.only(top: 10, left: 20, right: 20),
                       margin: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
@@ -59,8 +58,7 @@ class _GroupDiscoverPageState extends State<GroupDiscoverPage> {
                             color: Colors.grey.withOpacity(0.3),
                             spreadRadius: 1.0,
                             blurRadius: 1.0,
-                            offset: const Offset(
-                                0, 5.0), // changes the shadow position
+                            offset: const Offset(0, 5.0), // changes the shadow position
                           ),
                         ],
                       ),
@@ -75,44 +73,33 @@ class _GroupDiscoverPageState extends State<GroupDiscoverPage> {
                                     Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) =>
-                                                GroupSpecificView(
-                                                  groupName: snapshot
-                                                      .data![index].group_name,
-                                                  following: true,
+                                            builder: (context) => GroupSpecificView(
+                                                  groupName: snapshot.data![index].group_name,
+                                                  following: false,
                                                   mod: false,
                                                 )));
                                   },
-                                  child: snapshot.data![index].group_name != ""
-                                      ? Text(
-                                          "/${snapshot.data![index].group_name}")
-                                      : Container()),
-                              if (snapshot.data![index].username ==
-                                  global_username)
+                                  child: snapshot.data![index].group_name != "" ? Text("/${snapshot.data![index].group_name}") : Container()),
+                              if (snapshot.data![index].username == global_username)
                                 InkWell(
                                     onTap: () {
                                       showDialog(
                                           context: context,
                                           builder: (context) => AlertDialog(
-                                                title:
-                                                    const Text("Delete Post?"),
-                                                content: const Text(
-                                                    "You are about to delete this post. \nYou can't undo this action.\nAre you sure?"),
+                                                title: const Text("Delete Post?"),
+                                                content: const Text("You are about to delete this post. \nYou can't undo this action.\nAre you sure?"),
                                                 actions: [
                                                   TextButton(
                                                       onPressed: () {
-                                                        postInteraction(
-                                                            "archive_post?post_id=${snapshot.data![index].id}");
+                                                        postInteraction("archive_post?post_id=${snapshot.data![index].id}");
                                                         Navigator.pop(context);
                                                       },
-                                                      child:
-                                                          const Text("Delete")),
+                                                      child: const Text("Delete")),
                                                   TextButton(
                                                       onPressed: () {
                                                         Navigator.pop(context);
                                                       },
-                                                      child:
-                                                          const Text("Cancel"))
+                                                      child: const Text("Cancel"))
                                                 ],
                                               ));
                                     },
@@ -123,20 +110,13 @@ class _GroupDiscoverPageState extends State<GroupDiscoverPage> {
                             children: [
                               InkWell(
                                   onTap: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                UserSpecificView(
-                                                    user: snapshot.data![index]
-                                                        .username)));
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => UserSpecificView(user: snapshot.data![index].username)));
                                   },
                                   child: Text(snapshot.data![index].username)),
                               Text(" - ${formatDuration(diff)}"),
                             ],
                           ),
-                          Text(snapshot.data![index].title,
-                              style: const TextStyle(fontSize: 24)),
+                          Text(snapshot.data![index].title, style: const TextStyle(fontSize: 24)),
                           Text(
                             snapshot.data![index].content,
                             style: const TextStyle(fontSize: 16),
@@ -146,38 +126,28 @@ class _GroupDiscoverPageState extends State<GroupDiscoverPage> {
                             children: [
                               IconButton(
                                   onPressed: () {
-                                    postInteraction(
-                                            "vote_on_post?username=$global_username&post_id=${snapshot.data![index].id}&reaction_like=1")
-                                        .then((value) {
+                                    postInteraction("vote_on_post?username=$global_username&post_id=${snapshot.data![index].id}&reaction_like=1").then((value) {
                                       setState(() {
-                                        discoverPosts =
-                                            getPosts("get_user_category_posts");
+                                        discoverPosts = getPosts("get_user_category_posts");
                                       });
                                     });
                                   },
                                   icon: Icon(
                                     Icons.thumb_up,
-                                    color: snapshot.data![index].userVote == 1
-                                        ? Colors.lightBlue
-                                        : Colors.grey,
+                                    color: snapshot.data![index].userVote == 1 ? Colors.lightBlue : Colors.grey,
                                   )),
                               Text("${snapshot.data![index].likes}"),
                               IconButton(
                                   onPressed: () {
-                                    postInteraction(
-                                            "vote_on_post?username=$global_username&post_id=${snapshot.data![index].id}&reaction_like=0")
-                                        .then((value) {
+                                    postInteraction("vote_on_post?username=$global_username&post_id=${snapshot.data![index].id}&reaction_like=0").then((value) {
                                       setState(() {
-                                        discoverPosts =
-                                            getPosts("get_user_category_posts");
+                                        discoverPosts = getPosts("get_user_category_posts");
                                       });
                                     });
                                   },
                                   icon: Icon(
                                     Icons.thumb_down,
-                                    color: snapshot.data![index].userVote == 0
-                                        ? Colors.lightBlue
-                                        : Colors.grey,
+                                    color: snapshot.data![index].userVote == 0 ? Colors.lightBlue : Colors.grey,
                                   )),
                               Text("${snapshot.data![index].dislikes}")
                             ],

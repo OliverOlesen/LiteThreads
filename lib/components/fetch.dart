@@ -12,8 +12,7 @@ Future fetch(String request) async {
   final response = await http.get(Uri.parse("$API_URL/$request"));
 
   try {
-    HttpStatusSuccess ok =
-        HttpStatusSuccess.fromJson(jsonDecode(response.body));
+    HttpStatusSuccess ok = HttpStatusSuccess.fromJson(jsonDecode(response.body));
     return ok;
   } catch (e) {
     HttpStatusFail fail = HttpStatusFail.fromJson(jsonDecode(response.body));
@@ -22,27 +21,24 @@ Future fetch(String request) async {
 }
 
 Future<List<Group>> getGroups(String request) async {
-  final response = await http.get(Uri.parse("$API_URL/$request"),
-      headers: {"Authorization": global_token});
+  final response = await http.get(Uri.parse("$API_URL/$request"), headers: {"Authorization": global_token});
 
-  if (response.body.contains("No groups") ||
-      response.body.contains("User does not follow any groups")) {
+  if (response.body.contains("No groups") || response.body.contains("User does not follow any groups")) {
     return List.empty();
   }
+
   try {
     List<Group> groupsFull = List.empty(growable: true);
     List<Group> groups1 = List.empty(growable: true);
     List<Group> groups2 = List.empty(growable: true);
     if (request.contains("get_users_followed_and_moderated_groups")) {
-      if (!jsonDecode(response.body)['response']['followed_groups']
-          .contains("User does not follow any groups")) {
+      if (!jsonDecode(response.body)['response']['followed_groups'].contains("User does not follow any groups")) {
         groups1.addAll(List<Map<String, dynamic>>.from(
           jsonDecode(response.body)['response']['followed_groups'],
         ).map((json) => Group.fromJson(json)).toList());
       }
 
-      if (!jsonDecode(response.body)['response']['moderated_groups']
-          .contains("User does not moderate any groups")) {
+      if (!jsonDecode(response.body)['response']['moderated_groups'].contains("User does not moderate any groups")) {
         groups2.addAll(List<Map<String, dynamic>>.from(
           jsonDecode(response.body)['response']['moderated_groups'],
         ).map((json) {
@@ -50,15 +46,22 @@ Future<List<Group>> getGroups(String request) async {
           return Group.fromJson(json);
         }).toList());
 
+        List<int> toRemove = List.empty(growable: true);
         if (groups1.isNotEmpty && groups2.isNotEmpty) {
           for (var i = 0; i < groups1.length; i++) {
             for (var ii = 0; ii < groups2.length; ii++) {
               if (groups1[i].name == groups2[ii].name) {
-                groups1.removeAt(i);
+                toRemove.add(i);
               }
             }
           }
         }
+
+        toRemove.sort();
+        for (var i = toRemove.length - 1; i >= 0; i--) {
+          groups1.removeAt(toRemove[i]);
+        }
+
         if (groups1.isNotEmpty) {
           groupsFull.addAll(groups1);
         }
@@ -92,36 +95,29 @@ Future<List<Post>> getPosts(String request) async {
     List<Post> posts = List.empty(growable: true);
 
     if (request.contains("get_user_followed_users_and_groups_posts")) {
-      if (!jsonDecode(response.body)['response']['Users']
-          .contains("No posts")) {
+      if (!jsonDecode(response.body)['response']['Users'].contains("No posts")) {
         postsJsonUserList = List<Map<String, dynamic>>.from(
           jsonDecode(response.body)['response']['Users'],
         );
-        posts.addAll(
-            postsJsonUserList.map((json) => Post.fromJson(json)).toList());
+        posts.addAll(postsJsonUserList.map((json) => Post.fromJson(json)).toList());
       }
 
-      if (!jsonDecode(response.body)['response']['Groups']
-          .contains("No posts")) {
+      if (!jsonDecode(response.body)['response']['Groups'].contains("No posts")) {
         postsJsonGroupsList = List<Map<String, dynamic>>.from(
           jsonDecode(response.body)['response']['Groups'],
         );
-        posts.addAll(
-            postsJsonGroupsList.map((json) => Post.fromJson(json)).toList());
+        posts.addAll(postsJsonGroupsList.map((json) => Post.fromJson(json)).toList());
       }
     }
 
     if (request.contains("get_user_category_posts")) {
-      if (!jsonDecode(response.body)['response']
-          .contains("No posts from followed categories")) {
-        postsJsonGroupsList = List<Map<String, dynamic>>.from(
-            jsonDecode(response.body)['response']);
+      if (!jsonDecode(response.body)['response'].contains("No posts from followed categories")) {
+        postsJsonGroupsList = List<Map<String, dynamic>>.from(jsonDecode(response.body)['response']);
         posts.addAll(postsJsonGroupsList.map((e) => Post.fromJson(e)).toList());
       }
     }
 
-    posts.sort(
-        (a, b) => b.creationDate.compareTo(a.creationDate)); // Newest first
+    posts.sort((a, b) => b.creationDate.compareTo(a.creationDate)); // Newest first
 
     return posts;
   } catch (e) {
@@ -136,8 +132,7 @@ Future postInteraction(String request) async {
   );
 
   try {
-    HttpStatusSuccess ok =
-        HttpStatusSuccess.fromJson(jsonDecode(response.body));
+    HttpStatusSuccess ok = HttpStatusSuccess.fromJson(jsonDecode(response.body));
     return ok;
   } catch (e) {
     HttpStatusFail fail = HttpStatusFail.fromJson(jsonDecode(response.body));
@@ -159,8 +154,7 @@ Future<List<Post>> getSpecificPosts(String request) async {
       postsJsonGroupsList = List<Map<String, dynamic>>.from(
         jsonDecode(response.body)['response'],
       );
-      posts.addAll(
-          postsJsonGroupsList.map((json) => Post.fromJson(json)).toList());
+      posts.addAll(postsJsonGroupsList.map((json) => Post.fromJson(json)).toList());
 
       posts.sort((a, b) => b.creationDate.compareTo(a.creationDate));
     }
@@ -179,8 +173,7 @@ Future<List<User>> getFollowedUsers(String request) async {
   List<User> users = List.empty(growable: true);
 
   try {
-    userJsonList =
-        List<Map<String, dynamic>>.from(jsonDecode(response.body)['response']);
+    userJsonList = List<Map<String, dynamic>>.from(jsonDecode(response.body)['response']);
     users.addAll(userJsonList.map((json) => User.fromJson(json)).toList());
     return users;
   } catch (e) {
@@ -196,8 +189,7 @@ Future<List<AppCategory>> getCategories(String request) async {
 
   try {
     List<AppCategory> categories = List.empty(growable: true);
-    List<Map<String, dynamic>> temp =
-        List<Map<String, dynamic>>.from(jsonDecode(response.body)['response']);
+    List<Map<String, dynamic>> temp = List<Map<String, dynamic>>.from(jsonDecode(response.body)['response']);
 
     categories.addAll(temp.map((json) => AppCategory.fromJson(json)).toList());
     return categories;

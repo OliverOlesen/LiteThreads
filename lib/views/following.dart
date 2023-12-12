@@ -58,13 +58,11 @@ class _FollowingViewState extends State<FollowingView> {
                       onTap: () {
                         Navigator.push(context, MaterialPageRoute(
                           builder: (context) {
-                            return UserSpecificView(
-                                user: snapshot.data![index].username);
+                            return UserSpecificView(user: snapshot.data![index].username);
                           },
                         ));
                       },
-                      child: userCard(
-                          index, snapshot.data![index].username, "follow"),
+                      child: userCard(index, snapshot.data![index].username, "follow"),
                     ),
                   ),
                 ],

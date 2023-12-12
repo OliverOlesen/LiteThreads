@@ -37,9 +37,7 @@ Card groupCard(int i, String category, String title, String follow) {
               if (follow == "follow")
                 Container(
                   padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                      color: Colors.lightBlue,
-                      borderRadius: BorderRadius.all(Radius.circular(10))),
+                  decoration: const BoxDecoration(color: Colors.lightBlue, borderRadius: BorderRadius.all(Radius.circular(10))),
                   child: const Text(
                     "Following",
                     style: TextStyle(color: Colors.white),

@@ -65,10 +65,7 @@ class _PageNavigationState extends State<PageNavigation> {
                 color: Colors.white,
               ),
               onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const CreateGroupView()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateGroupView()));
               },
             )
           : null,
@@ -107,8 +104,7 @@ class _PageNavigationState extends State<PageNavigation> {
                         bool isFollowed = false;
 
                         for (int i = 0; i < userFollowed.length; i++) {
-                          if (categoryList[index].name ==
-                              userFollowed[i].name) {
+                          if (categoryList[index].name == userFollowed[i].name) {
                             isFollowed = true;
                             break;
                           } else {
@@ -120,13 +116,10 @@ class _PageNavigationState extends State<PageNavigation> {
                           leading: Checkbox(
                             value: isFollowed,
                             onChanged: (value) {
-                              postInteraction(
-                                      "user_follow_unfollow_category?category_name=${categoryList[index].name}")
-                                  .then((value) {
+                              postInteraction("user_follow_unfollow_category?category_name=${categoryList[index].name}").then((value) {
                                 if (value.status == "ok") {
                                   setState(() {
-                                    userFollowedCategories = getCategories(
-                                        "get_users_followed_categories");
+                                    userFollowedCategories = getCategories("get_users_followed_categories");
                                   });
                                 }
                               });
